@@ -68,17 +68,15 @@ export default {
     // TODO: validate hash
     // secretManageKey.value = hash;
 
-    console.log(localStorage.getStorageInfoSync());
-
     const getLocalSecret = (manageKey) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const key of localStorage.getStorageInfoSync().keys) {
         if (key.includes(process.env.VUE_APP_STORAGE_PREFIX)) {
           const fixedKey = key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, '');
           const secretItem = localStorage.getStorageSync(fixedKey);
-          console.log('__', key, fixedKey, secretItem);
-          if (secretItem.keys.manageKey === manageKey) {
-            console.log('LOCAL_ITEM', secretItem);
+          // console.log('__', key, fixedKey, secretItem);
+          if (secretItem.keys.manageKey !== undefined && secretItem.keys.manageKey === manageKey) {
+            // console.log('LOCAL_ITEM', secretItem);
             return secretItem;
           }
         }

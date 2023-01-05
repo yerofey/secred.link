@@ -102,7 +102,7 @@ export default {
     const localItem = ref({});
 
     const getItemData = async () => {
-      console.log('get_item');
+      // console.log('get_item');
       const apiUrl = `${process.env.VUE_APP_API_URL}/secret/get/${accessKeyHash2}`;
       // if (canManage.value === true) {
       //   const manageKeyHash1 = hashString(manageKey.value);
@@ -114,7 +114,7 @@ export default {
         const res = await axios.get(apiUrl);
         if (res.status === 200 && res.data) {
           const item = res.data.data;
-          console.log('item', accessKeyHash2, item);
+          // console.log('item', item); // accessKeyHash2
           secretItem.value = item;
           isDeletable.value = false; // item.is_deletable;
           isProtected.value = item.isProtected;
@@ -122,8 +122,9 @@ export default {
           isReady.value = true;
 
           // save item in local storage
-          if (!exists.value) {
-            console.log('SAVE_LOCAL_ITEM');
+          const saveLocally = false;
+          if (!exists.value && saveLocally) {
+            // console.log('SAVE_LOCAL_ITEM');
             const uuid = nanoid();
             localStorage.setStorageSync(
               `${uuid}`,
@@ -150,12 +151,12 @@ export default {
     };
 
     const updateRights = () => {
-      console.log('update_rights');
+      // console.log('update_rights');
       // eslint-disable-next-line no-restricted-syntax
       for (const key of localStorage.getStorageInfoSync().keys) {
         const item = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
         if (item !== undefined && item.keys.accessKey === accessKey) {
-          console.log('found', item);
+          // console.log('found', item);
           exists.value = true;
           localItem.value = item;
 
@@ -175,13 +176,13 @@ export default {
 
     // eslint-disable-next-line no-unused-vars
     const decryptSecret = () => {
-      console.log('decrypt');
+      // console.log('decrypt');
       const item = secretItem.value;
       const clientSecretPasswordHash = hashString(secretPassword.value);
       const contentEncryptionString = (isOwner.value ? localItem.value.decodeKey : hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`));
       const contentBase64 = hexToBase64(item.content);
       const testBase64 = hexToBase64(item.test);
-      console.log('contentEncryptionString', contentEncryptionString);
+      // console.log('contentEncryptionString', contentEncryptionString);
       // TODO: compare client password hash with passHash
       try {
         // eslint-disable-next-line max-len

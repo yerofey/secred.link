@@ -137,12 +137,12 @@ export default {
           lifetime: secretLifetime.value,
           v: process.env.VUE_APP_VERSION_PREFIX,
         };
-        console.log('secret', accessKeyHash2, secretData);
+        // console.log('secret', accessKeyHash2, secretData);
 
         const createSecretUrl = `${process.env.VUE_APP_API_URL}/secret/create`;
         const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
         if (res.status === 200 && res.data.data.success === true) {
-          console.log('SECRED_SAVED', res.data);
+          // console.log('SECRED_SAVED', res.data);
           isLoading.value = false;
           // save into localstorage
           localStorage.setStorageSync(

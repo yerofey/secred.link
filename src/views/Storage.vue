@@ -69,7 +69,7 @@ export default {
     const items = ref({});
     const storageIsEmpty = ref(true);
 
-    console.log('storage', localStorage.getStorageInfoSync());
+    // console.log('storage', localStorage.getStorageInfoSync());
 
     const clearStorage = () => {
       localStorage.clearStorageSync();
@@ -87,7 +87,7 @@ export default {
             // eslint-disable-next-line prefer-const
             const secretInfo = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
             const newItem = { ...secretInfo };
-            console.log('item', newItem);
+            // console.log('item', newItem);
             // TODO: validate required keys
             // eslint-disable-next-line max-len
             const itemTimestamp = (secretInfo.timestamp !== undefined ? (secretInfo.timestamp * 1000) : Date.now());
