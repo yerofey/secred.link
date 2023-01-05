@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h4>Edit Secret</h4>
+    <h4>New Secret Created</h4>
     <div v-if="isLoading" class="mt-4">Loading info...</div>
     <div v-else class="form-container mt-4">
       <div class="mb-3 copy-input-line">
@@ -23,7 +23,7 @@
           <BIconClipboard v-else/>
         </button>
       </div>
-      <div class="mt-4 mb-2">
+      <!-- <div class="mt-4 mb-2">
         <router-link
           :to="{
             name: 'delete',
@@ -31,7 +31,7 @@
           }"
           class="btn btn-outline-secondary btn-sm"
         ><BIconXCircleFill/> <span class="span-after-icon">Delete this secret</span></router-link>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -43,7 +43,7 @@ import { useStorage } from 'vue3-storage';
 import {
   BIconClipboard,
   BIconClipboardCheck,
-  BIconXCircleFill,
+  // BIconXCircleFill,
 } from 'bootstrap-icons-vue';
 import useClipboard from 'vue-clipboard3';
 
@@ -51,7 +51,7 @@ export default {
   components: {
     BIconClipboard,
     BIconClipboardCheck,
-    BIconXCircleFill,
+    // BIconXCircleFill,
   },
   setup() {
     const route = useRoute();
@@ -68,14 +68,19 @@ export default {
     // TODO: validate hash
     // secretManageKey.value = hash;
 
-    // console.log(localStorage.getStorageInfoSync());
+    console.log(localStorage.getStorageInfoSync());
 
     const getLocalSecret = (manageKey) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const key of localStorage.getStorageInfoSync().keys) {
-        const secretItem = localStorage.getStorageSync(key.replace('timed_', ''));
-        if (secretItem.keys.manageKey === manageKey) {
-          return secretItem;
+        if (key.includes(process.env.VUE_APP_STORAGE_PREFIX)) {
+          const fixedKey = key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, '');
+          const secretItem = localStorage.getStorageSync(fixedKey);
+          console.log('__', key, fixedKey, secretItem);
+          if (secretItem.keys.manageKey === manageKey) {
+            console.log('LOCAL_ITEM', secretItem);
+            return secretItem;
+          }
         }
       }
 
@@ -97,7 +102,7 @@ export default {
     secretAccessKey.value = secretItem.keys.accessKey;
 
     isLoading.value = false;
-    secretShareLink.value = `https://secred.co/view#${secretAccessKey.value}`; // http://localhost:8080
+    secretShareLink.value = `${process.env.VUE_APP_URL}/view#${secretAccessKey.value}`;
 
     return {
       isLoading,

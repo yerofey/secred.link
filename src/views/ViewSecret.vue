@@ -1,8 +1,8 @@
 <!-- eslint-disable max-len -->
 <template>
   <div>
-    <h4>View Secret</h4>
-    <div v-if="isLoading" class="mt-4">Loading info...</div>
+    <!-- <h4>View Secret</h4> -->
+    <div v-if="isLoading" class="mt-4">Loading secret...</div>
     <div v-else class="form-container mt-4">
       <div v-if="isFound">
         <div v-if="isDecrypted">
@@ -19,15 +19,15 @@
               This secret is already deleted, copy data if you need to save it.
             </span>
           </small>
-          <div v-if="canManage" class="mt-4 mb-2">
+          <!-- <div v-if="canManage" class="mt-4 mb-2">
             <router-link
               :to="{
-                name: 'delete',
+                name: '1delete',
                 hash: `#${manageKey}`,
               }"
               class="btn btn-outline-secondary btn-sm"
             ><BIconXCircleFill/> <span class="span-after-icon">Delete this secret</span></router-link>
-          </div>
+          </div> -->
         </div>
         <div v-else>
           <form @submit.prevent="submitPassword">
@@ -57,61 +57,88 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStorage } from 'vue3-storage';
-import {
-  BIconXCircleFill,
-} from 'bootstrap-icons-vue';
+import { customAlphabet } from 'nanoid';
+// import {
+//   BIconXCircleFill,
+// } from 'bootstrap-icons-vue';
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 
 const { Buffer } = require('buffer');
 
 export default {
-  components: {
-    BIconXCircleFill,
-  },
+  // components: {
+  //   BIconXCircleFill,
+  // },
   setup() {
     const CryptoJS = inject('cryptojs');
     const route = useRoute();
     const localStorage = useStorage();
 
+    const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const nanoid = customAlphabet(symbolsString, 16);
     const hashString = (string) => CryptoJS.SHA256(string).toString();
     const hexToBase64 = (string) => Buffer.from(string, 'hex').toString('base64');
+    const lifetimeSeconds = 30 * 24 * (60 * 60 * 1000); // 30 days
 
     const accessKey = route.hash.substring(1);
     const accessKeyHash1 = hashString(accessKey);
     const accessKeyHash2 = hashString(accessKeyHash1);
     const prefix = accessKey.substring(0, 1);
 
+    const exists = ref(false);
     const canManage = ref(false);
+    const isOwner = ref(false);
     const manageKey = ref('');
     const isDecrypted = ref(false);
     const isDeletable = ref(false);
     const isFound = ref(false);
     const isLoading = ref(true);
+    const isReady = ref(false);
     const isProtected = ref(false);
     const secretItem = ref({});
     const secretContent = ref('');
     const secretPassword = ref('');
+    const localItem = ref({});
 
     const getItemData = async () => {
-      let apiUrl = `http://localhost:3001/v1/get/a${accessKeyHash2}`;
-      if (canManage.value === true) {
-        const manageKeyHash1 = hashString(manageKey.value);
-        const manageKeyHash2 = hashString(manageKeyHash1);
-
-        apiUrl += `/m${manageKeyHash2}`;
-      }
+      console.log('get_item');
+      const apiUrl = `${process.env.VUE_APP_API_URL}/secret/get/${accessKeyHash2}`;
+      // if (canManage.value === true) {
+      //   const manageKeyHash1 = hashString(manageKey.value);
+      //   const manageKeyHash2 = hashString(manageKeyHash1);
+      //   apiUrl += `/${manageKeyHash2}`;
+      // }
 
       try {
         const res = await axios.get(apiUrl);
-        if (res.data && res.data.data.found) {
-          const { data } = res.data;
-          const { item } = data;
-
+        if (res.status === 200 && res.data) {
+          const item = res.data.data;
+          console.log('item', accessKeyHash2, item);
           secretItem.value = item;
-          isDeletable.value = item.is_deletable;
-          isProtected.value = item.is_protected;
+          isDeletable.value = false; // item.is_deletable;
+          isProtected.value = item.isProtected;
           isFound.value = true;
+          isReady.value = true;
+
+          // save item in local storage
+          if (!exists.value) {
+            console.log('SAVE_LOCAL_ITEM');
+            const uuid = nanoid();
+            localStorage.setStorageSync(
+              `${uuid}`,
+              {
+                sid: uuid,
+                keys: {
+                  accessKey,
+                },
+                hasPassword: isProtected.value,
+                timestamp: Math.floor(Date.now() / 1000),
+                // date: new Date(),
+              },
+              lifetimeSeconds,
+            );
+          }
         } else {
           isFound.value = false;
         }
@@ -123,12 +150,24 @@ export default {
     };
 
     const updateRights = () => {
+      console.log('update_rights');
       // eslint-disable-next-line no-restricted-syntax
       for (const key of localStorage.getStorageInfoSync().keys) {
-        const item = localStorage.getStorageSync(key.replace('timed_', ''));
-        if (item.keys.accessKey === accessKey) {
-          canManage.value = true;
-          manageKey.value = item.keys.manageKey;
+        const item = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
+        if (item !== undefined && item.keys.accessKey === accessKey) {
+          console.log('found', item);
+          exists.value = true;
+          localItem.value = item;
+
+          if (item.keys.manageKey !== undefined) {
+            canManage.value = true;
+            manageKey.value = item.keys.manageKey;
+          }
+
+          // if (item.keys.decodeKey !== undefined) {
+          //   console.log('IS_OWNER');
+          //   isOwner.value = true;
+          // }
           break;
         }
       }
@@ -136,15 +175,24 @@ export default {
 
     // eslint-disable-next-line no-unused-vars
     const decryptSecret = () => {
+      console.log('decrypt');
       const item = secretItem.value;
       const clientSecretPasswordHash = hashString(secretPassword.value);
-      const contentEncryptionString = hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`);
-      const contentBase64 = hexToBase64(item.contenthex);
+      const contentEncryptionString = (isOwner.value ? localItem.value.decodeKey : hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`));
+      const contentBase64 = hexToBase64(item.content);
+      const testBase64 = hexToBase64(item.test);
+      console.log('contentEncryptionString', contentEncryptionString);
+      // TODO: compare client password hash with passHash
       try {
+        // eslint-disable-next-line max-len
+        const decryptedTest = CryptoJS.AES.decrypt(testBase64, contentEncryptionString).toString(CryptoJS.enc.Utf8);
+        if (decryptedTest === process.env.VUE_APP_TEST_STRING) {
+          isDecrypted.value = true;
+        }
+        // TODO: on failed decryption
         // eslint-disable-next-line max-len
         const decryptedContent = CryptoJS.AES.decrypt(contentBase64, contentEncryptionString).toString(CryptoJS.enc.Utf8);
         secretContent.value = decryptedContent;
-        isDecrypted.value = true;
       } catch (err) {
         console.error('ERORR', err);
       }
@@ -154,9 +202,9 @@ export default {
     };
 
     // eslint-disable-next-line no-unused-vars
-    watch(isLoading, (newVal, oldVal) => {
+    watch(isReady, (newVal, oldVal) => {
       // eslint-disable-next-line max-len
-      if (newVal === false && isProtected.value === false && secretItem.value.contenthex !== undefined) {
+      if (newVal === true && secretItem.value.content !== undefined && (isProtected.value === false || isOwner.value === true)) {
         decryptSecret();
       }
     });

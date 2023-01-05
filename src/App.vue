@@ -1,11 +1,11 @@
 <!-- eslint-disable max-len -->
 <template>
   <header class="p-3 border-bottom">
-    <div class="container">
+    <div class="container-sm">
       <div class="app-nav d-flex flex-wrap">
         <router-link to="/" class="d-flex align-items-center text-dark text-decoration-none logo-link">
           <img src="/img/icons/apple-touch-icon.png" alt="" width="40" height="40" class="d-inline-block align-text-top" draggable="false">
-          <span class="project-title">Timed</span>
+          <span class="project-title">Secred</span>
           <span class="project-subtitle">β</span>
         </router-link>
         <div class="app-buttons">
@@ -21,11 +21,6 @@
       <router-view/>
     </div>
   </main>
-  <footer class="p-3 border-top">
-    <div class="container">
-      &copy; Timed.cc, 2023
-    </div>
-  </footer>
 </template>
 
 <script>
@@ -113,8 +108,8 @@ header {
 
 main {
   padding-top: 40px;
-  height: auto;
-  min-height: calc(100% - 130px);
+  height: 100%;
+  // min-height: calc(100% - 130px);
 
   background-color: #f9fafb;
 }

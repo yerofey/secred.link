@@ -1,5 +1,5 @@
 {
-  "name": "timed.cc",
+  "name": "secred.app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "human-time": "^0.0.2",
     "modern-normalize": "^1.1.0",
     "nanoid": "^3.3.4",
+    "querystring": "^0.2.1",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.45",
     "vue-clipboard3": "^1.0.1",

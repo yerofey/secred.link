@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Storage from '../views/Storage.vue';
-import EditSecret from '../views/EditSecret.vue';
-import DeleteSecret from '../views/DeleteSecret.vue';
+import NewSecret from '../views/NewSecret.vue';
+// import DeleteSecret from '../views/_DeleteSecret.vue';
 import ViewSecret from '../views/ViewSecret.vue';
 
 const routes = [
@@ -12,15 +12,15 @@ const routes = [
     component: Home,
   },
   {
-    path: '/edit',
-    name: 'edit',
-    component: EditSecret,
+    path: '/new',
+    name: 'new',
+    component: NewSecret,
   },
-  {
-    path: '/delete',
-    name: 'delete',
-    component: DeleteSecret,
-  },
+  // {
+  //   path: '/delete',
+  //   name: 'delete',
+  //   component: DeleteSecret,
+  // },
   {
     path: '/storage',
     name: 'storage',

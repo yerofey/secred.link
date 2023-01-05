@@ -16,15 +16,15 @@
             </h6>
             <p class="card-text secret-info text-muted">
               <div v-if="item.hasPassword">
-                <BIconLockFill/> protected
+                <BIconLockFill/> is protected
               </div>
               <div v-else>
-                <BIconUnlockFill/> not protected
+                <BIconUnlockFill/> is not protected
               </div>
               <!-- eslint-disable-next-line vue/no-parsing-error -->
             </p>
             <span class="secret-date">
-              {{ item.formattedDate }}
+              {{ item.displayDate }}
             </span>
           </div>
         </router-link>
@@ -69,7 +69,7 @@ export default {
     const items = ref({});
     const storageIsEmpty = ref(true);
 
-    // console.log('storage', localStorage.getStorageInfoSync());
+    console.log('storage', localStorage.getStorageInfoSync());
 
     const clearStorage = () => {
       localStorage.clearStorageSync();
@@ -83,14 +83,16 @@ export default {
       if (localStorage.getStorageInfoSync().keys.length > 0) {
         // eslint-disable-next-line no-restricted-syntax
         for (const key of localStorage.getStorageInfoSync().keys) {
-          if (key.includes('timed_')) {
-            const secretInfo = localStorage.getStorageSync(key.replace('timed_', ''));
+          if (key.includes(`${process.env.VUE_APP_STORAGE_PREFIX}`)) {
+            // eslint-disable-next-line prefer-const
+            const secretInfo = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
+            const newItem = { ...secretInfo };
+            console.log('item', newItem);
             // TODO: validate required keys
-            // secretInfo.date
-            secretInfo.formattedDate = human(new Date(secretInfo.date));
-            secretInfo.timestamp = Math.round(new Date(secretInfo.date).getTime() / 1000);
-            // console.log('item', secretInfo);
-            itemsObject[secretInfo.uuid] = secretInfo;
+            // eslint-disable-next-line max-len
+            const itemTimestamp = (secretInfo.timestamp !== undefined ? (secretInfo.timestamp * 1000) : Date.now());
+            newItem.displayDate = human(new Date(itemTimestamp));
+            itemsObject[secretInfo.sid] = newItem;
           }
         }
       }
@@ -135,7 +137,8 @@ export default {
     min-width: 190px;
     flex-direction: column;
     background-color: #fff;
-    box-shadow: 2px 3px 4px rgba(51,51,51,.06);
+    // box-shadow: 2px 3px 4px rgba(51,51,51,.06);
+    box-shadow: 0 0 24px -8px #0000001a;
 
     text-decoration: none;
 
@@ -152,6 +155,10 @@ export default {
       margin-bottom: 0;
 
       font-size: 14px;
+
+      svg {
+        vertical-align: top;
+      }
     }
 
     .secret-date {

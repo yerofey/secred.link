@@ -13,5 +13,5 @@ createApp(App)
   .use(router)
   .use(VueCryptojs)
   // .use(BootstrapIconsPlugin)
-  .use(Vue3Storage, { namespace: 'timed_' })
+  .use(Vue3Storage, { namespace: process.env.VUE_APP_STORAGE_PREFIX })
   .mount('#app');

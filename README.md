@@ -1,4 +1,4 @@
-# timed.cc
+# secred.app
 
 ## Project setup
 

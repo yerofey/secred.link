@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable max-len -->
+<!-- eslint-disable-next-line max-len -->
 <!-- eslint-disable vuejs-accessibility/form-control-has-label vuejs-accessibility/label-has-for -->
+<!-- eslint-disable vue/no-unused-vars -->
 <template>
   <form class="form-container" @submit.prevent="processForm">
     <div class="mb-4">
@@ -12,10 +13,13 @@
         class="form-control"
         maxlength="2048"
         rows="4"
-        placeholder="Insert content here you want to secure..."
+        placeholder="Insert the content you want to secure..."
         v-model="secretContent"
       ></textarea>
     </div>
+    <!-- <div class="mb-1 input-group text-center text-muted">
+      <small class="mx-auto">OPTIONAL</small>
+    </div> -->
     <!-- <div class="mb-3 input-group">
       <label class="input-group-text" for="inputGroupSelect01">Password</label>
       <input
@@ -30,16 +34,18 @@
     <!-- <div class="mb-3 input-group">
       <label class="input-group-text" for="inputGroupSelect02">Expires In</label>
       <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
-        <option value="30d" selected>30 days</option>
-        <option value="7d">7 days</option>
-        <option value="3d">3 days</option>
-        <option value="1d">1 day</option>
-        <option value="12h">12 hours</option>
-        <option value="6h">6 hours</option>
-        <option value="3h">3 hours</option>
-        <option value="1h">1 hour</option>
-        <option value="30m">30 minutes</option>
-        <option value="5m">5 minutes</option>
+        <option :value="5 * 60">5 minutes</option>
+        <option :value="10 * 60">10 minutes</option>
+        <option :value="30 * 60">30 minutes</option>
+        <option :value="60 * 60">60 minutes</option>
+        <option :value="3 * 60 * 60">3 hours</option>
+        <option :value="6 * 60 * 60">6 hours</option>
+        <option :value="12 * 60 * 60">12 hours</option>
+        <option :value="24 * 60 * 60">24 hours</option>
+        <option :value="3 * 24 * 60 * 60" selected>3 days</option>
+        <option :value="7 * 24 * 60 * 60">7 days</option>
+        <option :value="14 * 24 * 60 * 60">14 days</option>
+        <option :value="30 * 24 * 60 * 60">30 days</option>
       </select>
     </div> -->
     <div class="mb-3">
@@ -61,7 +67,9 @@ import { useRouter } from 'vue-router';
 import { useStorage } from 'vue3-storage';
 import { customAlphabet } from 'nanoid';
 import { BIconPlusCircleFill } from 'bootstrap-icons-vue';
+// eslint-disable-next-line no-unused-vars
 import axios from 'axios';
+import querystring from 'querystring';
 
 const { Buffer } = require('buffer/');
 
@@ -78,43 +86,36 @@ export default {
     const submitIsEnabled = ref(false);
     const secretContent = ref('');
     const secretPassword = ref('');
-    const secretLifetime = ref('7d');
+    const secretLifetime = ref((3 * 24 * 60 * 60));
 
     const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-    const hashString = (string) => CryptoJS.SHA256(string).toString();
     const nanoid = customAlphabet(symbolsString, 16);
-    // const base64ToHex = (str) => {
-    //   const raw = atob(str);
-    //   let result = '';
-    //   // eslint-disable-next-line no-plusplus
-    //   for (let i = 0; i < raw.length; i += 1) {
-    //     const hex = raw.charCodeAt(i).toString(16);
-    //     result += (hex.length === 2 ? hex : `0${hex}`);
-    //   }
-    //   return result;
-    // };
+    const hashString = (string) => CryptoJS.SHA256(string).toString();
     const base64ToHex = (str) => Buffer.from(str, 'base64').toString('hex');
+
     const processForm = async () => {
       const clientSecretContent = secretContent.value;
       const clientSecretPassword = secretPassword.value;
       isLoading.value = true;
 
-      const prefix = '0';
+      const prefix = `${process.env.VUE_APP_VERSION_PREFIX}`;
       const uuid = nanoid();
-      // const secretHash = hashString(customAlphabet(symbolsString, 64)());
       const clientSecretPasswordHash = hashString(clientSecretPassword);
+      // const passHash = hashString(clientSecretPasswordHash);
       const accessKey = prefix + nanoid();
       const accessKeyHash1 = hashString(accessKey);
       const accessKeyHash2 = hashString(accessKeyHash1);
       const manageKey = prefix + nanoid();
       const manageKeyHash1 = hashString(manageKey);
       const manageKeyHash2 = hashString(manageKeyHash1);
-      // eslint-disable-next-line max-len
-      // const testHash = hashString(`${prefix}${customAlphabet(symbolsString, 64)()}${new Date()}`);
-
       const contentEncryptionString = hashString(
         `${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`,
+      );
+      const testHash = base64ToHex(
+        CryptoJS.AES.encrypt(
+          process.env.VUE_APP_TEST_STRING,
+          contentEncryptionString,
+        ).toString(),
       );
       // eslint-disable-next-line max-len
       const encryptedSecretContentBase64 = CryptoJS.AES.encrypt(
@@ -122,66 +123,51 @@ export default {
         contentEncryptionString,
       ).toString();
       const encryptedSecretContent = base64ToHex(encryptedSecretContentBase64);
-      // eslint-disable-next-line max-len
-      // const encryptedEditTestHash = base64ToHex(CryptoJS.AES.encrypt(testHash, manageKeyHash1).toString());
-      // eslint-disable-next-line max-len
-      // const encryptedViewTestHash = base64ToHex(CryptoJS.AES.encrypt(testHash, accessKeyHash1).toString());
-
-      // console.log('SECRET_HASH', secretHash);
-      // console.log('accessKey', accessKey);
-      // console.log('accessKey_HASH', accessKeyHash1, accessKeyHash2);
-      // console.log('ENCRYPTED_CONTENT', encryptedSecretContent);
-      // console.log('CONTENT_BASE64', encryptedSecretContentBase64);
-      // console.log('ENCRYPTED_PASSWORD', encryptedSecretPassword);
-      // console.log('ENCRYPTION_STRING', contentEncryptionString);
-      // console.log('manageKey', manageKey);
-      // console.log('manageKey_HASH', manageKeyHash1, manageKeyHash2);
-
-      const lifetimeSeconds = 7 * 24 * (60 * 60 * 1000); // 7 days
+      // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
 
       // save on the API
       const save = true;
       if (save) {
-        const data = {
-          // testhash: testHash,
-          // viewtesthash: encryptedViewTestHash,
-          // edittesthash: encryptedEditTestHash,
-          accessKey: accessKeyHash2,
-          manageKey: manageKeyHash2,
+        const secretData = {
+          accessKey: accessKeyHash2, // 2x hashed
+          manageKey: manageKeyHash2, // 2x hashed
           contentHash: encryptedSecretContent,
-          isProtected: clientSecretPassword.length > 0,
-          lifetime: lifetimeSeconds,
+          testHash,
+          isProtected: false, // (secretPassword.value.length > 0),
+          lifetime: secretLifetime.value,
+          v: process.env.VUE_APP_VERSION_PREFIX,
         };
-        // console.log('data', data);
-        const res = await axios.post(`${process.env.VUE_APP_API_URL}/create`, data, {
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-          },
-        });
-        // console.log('res', res);
-        if (res.status === 200 && res.data.success === true) {
+        console.log('secret', accessKeyHash2, secretData);
+
+        const createSecretUrl = `${process.env.VUE_APP_API_URL}/secret/create`;
+        const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
+        if (res.status === 200 && res.data.data.success === true) {
+          console.log('SECRED_SAVED', res.data);
           isLoading.value = false;
-          // const secretUuid = res.data.uuid || uuid;
           // save into localstorage
           localStorage.setStorageSync(
-            `secret_${uuid}`,
+            `${uuid}`,
             {
-              uuid,
+              sid: uuid,
               keys: {
-                manageKey,
                 accessKey,
+                manageKey,
+                decodeKey: contentEncryptionString,
               },
-              hasPassword: clientSecretPassword.length > 0,
-              date: new Date(),
+              hasPassword: false, // (secretPassword.value.length > 0),
+              // date: new Date(),
+              timestamp: Math.floor(Date.now() / 1000),
             },
-            lifetimeSeconds,
+            secretLifetime.value,
           );
           // go to editing page
-          router.push({ path: '/edit', hash: `#${manageKey}` });
+          router.push({ path: '/new', hash: `#${manageKey}` });
+          // setTimeout(() => {
+          //   router.push({ path: '/view', hash: `#${accessKey}` });
+          // }, 250);
         } else {
           // TODO: error
-          console.error('FAILED TO CREATE');
+          console.error('FAILED_TO_CREATE');
         }
       }
     };
