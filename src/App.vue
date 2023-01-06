@@ -8,11 +8,11 @@
           <span class="project-title">Secred</span>
           <span class="project-subtitle">β</span>
         </router-link>
-        <div class="app-buttons">
+        <!-- <div class="app-buttons">
           <router-link to="/storage" class="storage-link btn d-block link-dark text-decoration-none">
             <BIconGridFill/>
           </router-link>
-        </div>
+        </div> -->
       </div>
     </div>
   </header>
@@ -24,13 +24,13 @@
 </template>
 
 <script>
-import {
-  BIconGridFill, // Grid | Bookmark
-} from 'bootstrap-icons-vue';
+// import {
+//   BIconGridFill, // Grid | Bookmark
+// } from 'bootstrap-icons-vue';
 
 export default {
   components: {
-    BIconGridFill,
+    // BIconGridFill,
     // BIconBookmarkStar,
   },
 };
