@@ -50,6 +50,8 @@ body,
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+
+  background-color: #f9fafb;
 }
 
 footer {
@@ -108,10 +110,8 @@ header {
 
 main {
   padding-top: 40px;
-  height: 100%;
+  // height: 100%;
   // min-height: calc(100% - 130px);
-
-  background-color: #f9fafb;
 }
 
 nav {
