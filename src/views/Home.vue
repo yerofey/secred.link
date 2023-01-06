@@ -53,16 +53,25 @@
         @click="processForm"
         type="button"
         class="btn btn-primary btn-lg submit-button"
+        :class="{
+          'is-loading': submitInProcess,
+        }"
         :disabled="!submitIsEnabled"
       >
-        <BIconPlusCircleFill /> <span class="span-after-icon">Create secret</span>
+        <!-- eslint-disable-next-line max-len -->
+        <BIconPlusCircleFill /> <span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
       </button>
     </div>
   </form>
 </template>
 
 <script>
-import { ref, inject, watch } from 'vue';
+import {
+  ref,
+  inject,
+  watch,
+  // onMounted,
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useStorage } from 'vue3-storage';
 import { customAlphabet } from 'nanoid';
@@ -82,8 +91,8 @@ export default {
     const router = useRouter();
     const localStorage = useStorage();
 
-    const isLoading = ref(false);
     const submitIsEnabled = ref(false);
+    const submitInProcess = ref(false);
     const secretContent = ref('');
     const secretPassword = ref('');
     const secretLifetime = ref((3 * 24 * 60 * 60));
@@ -93,11 +102,18 @@ export default {
     const hashString = (string) => CryptoJS.SHA256(string).toString();
     const base64ToHex = (str) => Buffer.from(str, 'base64').toString('hex');
 
+    // eslint-disable-next-line no-promise-executor-return
+    // const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const processForm = async () => {
+      // add loading status
+      submitInProcess.value = true;
+      // disable submit button
+      submitIsEnabled.value = false;
+      // if (process.env.VUE_APP_ENV === 'local') {
+      //   await sleep(30000);
+      // }
       const clientSecretContent = secretContent.value;
       const clientSecretPassword = secretPassword.value;
-      isLoading.value = true;
-
       const prefix = `${process.env.VUE_APP_VERSION_PREFIX}`;
       const uuid = nanoid();
       const clientSecretPasswordHash = hashString(clientSecretPassword);
@@ -126,51 +142,55 @@ export default {
       // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
 
       // save on the API
-      const save = true;
-      if (save) {
-        const secretData = {
-          accessKey: accessKeyHash2, // 2x hashed
-          manageKey: manageKeyHash2, // 2x hashed
-          contentHash: encryptedSecretContent,
-          testHash,
-          isProtected: false, // (secretPassword.value.length > 0),
-          lifetime: secretLifetime.value,
-          v: process.env.VUE_APP_VERSION_PREFIX,
-        };
-        // console.log('secret', accessKeyHash2, secretData);
-
-        const createSecretUrl = `${process.env.VUE_APP_API_URL}/secret/create`;
-        const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
-        if (res.status === 200 && res.data.data.success === true) {
-          // console.log('SECRED_SAVED', res.data);
-          isLoading.value = false;
-          // save into localstorage
-          localStorage.setStorageSync(
-            `${uuid}`,
-            {
-              sid: uuid,
-              keys: {
-                accessKey,
-                manageKey,
-                decodeKey: contentEncryptionString,
-              },
-              hasPassword: false, // (secretPassword.value.length > 0),
-              // date: new Date(),
-              timestamp: Math.floor(Date.now() / 1000),
+      const secretData = {
+        accessKey: accessKeyHash2, // 2x hashed
+        manageKey: manageKeyHash2, // 2x hashed
+        contentHash: encryptedSecretContent,
+        testHash,
+        isProtected: false, // (secretPassword.value.length > 0),
+        lifetime: secretLifetime.value,
+        v: process.env.VUE_APP_VERSION_PREFIX,
+      };
+      // console.log('secret', accessKeyHash2, secretData);
+      const createSecretUrl = `${process.env.VUE_APP_API_URL}/secret/create`;
+      const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
+      if (res.status === 200 && res.data.data.success === true) {
+        // console.log('SECRED_SAVED', res.data);
+        // add loading status
+        // submitInProcess.value = false;
+        // disable submit button
+        // submitIsEnabled.value = true;
+        // save into localstorage
+        localStorage.setStorageSync(
+          `${uuid}`,
+          {
+            sid: uuid,
+            keys: {
+              accessKey,
+              manageKey,
+              decodeKey: contentEncryptionString,
             },
-            secretLifetime.value,
-          );
-          // go to editing page
-          router.push({ path: '/new', hash: `#${manageKey}` });
-          // setTimeout(() => {
-          //   router.push({ path: '/view', hash: `#${accessKey}` });
-          // }, 250);
-        } else {
-          // TODO: error
-          console.error('FAILED_TO_CREATE');
-        }
+            hasPassword: false, // (secretPassword.value.length > 0),
+            // date: new Date(),
+            timestamp: Math.floor(Date.now() / 1000),
+          },
+          secretLifetime.value,
+        );
+        // go to editing page
+        router.push({ path: '/new', hash: `#${manageKey}` });
+        // setTimeout(() => {
+        //   router.push({ path: '/view', hash: `#${accessKey}` });
+        // }, 250);
+      } else {
+        // TODO: error
+        console.error('FAILED_TO_CREATE');
       }
     };
+
+    // init
+    // onMounted(() => {
+    //   console.log('INIT');
+    // });
 
     // eslint-disable-next-line no-unused-vars
     watch(secretContent, (newVal, oldVal) => {
@@ -178,8 +198,8 @@ export default {
     });
 
     return {
-      isLoading,
       submitIsEnabled,
+      submitInProcess,
       secretContent,
       secretPassword,
       secretLifetime,
@@ -189,4 +209,11 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.form-container {
+  .submit-button.is-loading {
+    cursor: wait !important;
+    pointer-events: all !important;
+  }
+}
+</style>
