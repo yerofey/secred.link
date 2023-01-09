@@ -14,13 +14,15 @@
         maxlength="2048"
         rows="4"
         placeholder="Insert the content you want to secure..."
+        autofocus
+        autocorrect="off"
         v-model="secretContent"
       ></textarea>
     </div>
-    <!-- <div class="mb-1 input-group text-center text-muted">
+    <div class="mb-1 input-group text-center text-muted">
       <small class="mx-auto">OPTIONAL</small>
-    </div> -->
-    <!-- <div class="mb-3 input-group">
+    </div>
+    <div class="mb-3 input-group">
       <label class="input-group-text" for="inputGroupSelect01">Password</label>
       <input
         type="text"
@@ -28,9 +30,10 @@
         id="inputGroupSelect01"
         placeholder="Passphrase to access your secret"
         autocomplete="off"
+        maxlength="64"
         v-model="secretPassword"
       />
-    </div> -->
+    </div>
     <!-- <div class="mb-3 input-group">
       <label class="input-group-text" for="inputGroupSelect02">Expires In</label>
       <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
@@ -134,7 +137,7 @@ export default {
       ).toString();
       const encryptedSecretContent = base64ToHex(encryptedSecretContentBase64);
       const contentHexHash = hashString(encryptedSecretContent);
-      const secretIsProtectedWithPassword = false;
+      const secretIsProtectedWithPassword = (secretPassword.value.length > 0);
       // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
       const sid = hashString(accessKeyHash2).slice(0, 20);
       const dataHash = hashString(`${accessKeyHash2}${manageKeyHash2}${contentHexHash}${secretIsProtectedWithPassword}`);
@@ -145,11 +148,11 @@ export default {
         manageKey: manageKeyHash2, // 2x hashed
         contentHash: encryptedSecretContent,
         testHash,
-        isProtected: false, // (secretPassword.value.length > 0),
+        isProtected: secretIsProtectedWithPassword,
         lifetime: secretLifetime.value,
         v: import.meta.env.VITE_VERSION_PREFIX,
       };
-      // console.log('secret', accessKeyHash2, dataHash);
+      console.log('secret', secretData);
       const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
       const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
       if (res.status === 200 && res.data.data.success === true) {
@@ -167,7 +170,7 @@ export default {
             },
             isOwner: true,
             isEncoded: false,
-            hasPassword: secretIsProtectedWithPassword, // (secretPassword.value.length > 0),
+            hasPassword: secretIsProtectedWithPassword,
             timestamp: Math.floor(Date.now()),
             v: import.meta.env.VITE_STORAGE_VERSION,
           },

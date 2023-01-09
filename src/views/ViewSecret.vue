@@ -23,26 +23,26 @@
                 This secret is already deleted, copy data if you need to save it.
               </span>
             </small> -->
-            <div class="mt-4">
-              <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
-                <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
-              </button>
-            </div>
           </div>
           <div v-else>
             <form @submit.prevent="submitPassword">
               <div class="py-3">
                 <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-                <input type="text" class="form-control" placeholder="Enter passphrase to decrypt secret" v-model="secretPassword">
+                <input type="text" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" placeholder="Enter passphrase to decrypt secret" v-model="inputPassword" required autofocus>
               </div>
               <div class="">
-                <button class="btn btn-primary" type="submit">Unlock</button>
+                <button class="btn btn-primary" type="submit">Unlock secret</button>
               </div>
             </form>
           </div>
         </div>
         <div v-else>
           Secret not found!
+        </div>
+        <div class="mt-4">
+          <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
+            <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
+          </button>
         </div>
       </div>
       <div v-else>
@@ -103,7 +103,9 @@ export default {
     const secretItem = ref({});
     const secretCreationDate = ref('');
     const secretContent = ref('');
-    const secretPassword = ref('');
+    const inputPassword = ref('');
+    const inputPasswordIsCorrect = ref(false);
+    const inputPasswordShowStatus = ref(false);
     const localItem = ref({});
 
     const getItemData = async () => {
@@ -195,8 +197,9 @@ export default {
     const decryptSecret = () => {
       // console.log('decrypt');
       const item = secretItem.value;
-      const clientSecretPasswordHash = hashString(secretPassword.value);
-      const contentEncryptionString = (isOwner.value ? localItem.value.decodeKey : hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`));
+      const clientSecretPasswordHash = hashString(inputPassword.value);
+      // (isOwner.value ? localItem.value.decodeKey :
+      const contentEncryptionString = hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`);
       const contentBase64 = hexToBase64(item.content);
       const testBase64 = hexToBase64(item.test);
       // console.log('contentEncryptionString', contentEncryptionString);
@@ -206,6 +209,11 @@ export default {
         const decryptedTest = CryptoJS.AES.decrypt(testBase64, contentEncryptionString).toString(CryptoJS.enc.Utf8);
         if (decryptedTest === import.meta.env.VITE_TEST_STRING) {
           isDecrypted.value = true;
+          inputPasswordIsCorrect.value = true;
+          inputPasswordShowStatus.value = true;
+        } else {
+          inputPasswordIsCorrect.value = false;
+          inputPasswordShowStatus.value = true;
         }
         // TODO: on failed decryption
         // eslint-disable-next-line max-len
@@ -215,6 +223,7 @@ export default {
         console.error('ERORR', err);
       }
     };
+
     const submitPassword = () => {
       decryptSecret();
     };
@@ -222,8 +231,14 @@ export default {
     // eslint-disable-next-line no-unused-vars
     watch(isReady, (newVal, oldVal) => {
       // eslint-disable-next-line max-len
-      if (newVal === true && secretItem.value.content !== undefined && (isProtected.value === false || isOwner.value === true)) {
+      if (newVal === true && secretItem.value.content !== undefined && isProtected.value === false) { // (isProtected.value === false || isOwner.value === true)
         decryptSecret();
+      }
+    });
+
+    watch(inputPassword, (newVal, oldVal) => {
+      if (newVal != oldVal) {
+        inputPasswordShowStatus.value = false;
       }
     });
 
@@ -243,7 +258,9 @@ export default {
       isProtected,
       secretCreationDate,
       secretContent,
-      secretPassword,
+      inputPassword,
+      inputPasswordIsCorrect,
+      inputPasswordShowStatus,
       deleteItemFromDevice,
       submitPassword,
       human,
