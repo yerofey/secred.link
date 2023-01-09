@@ -59,6 +59,8 @@ body {
 
   height: auto;
   min-height: 100vh;
+
+  background-color: #f9fafb !important;
 }
 
 #app {
@@ -68,8 +70,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-
-  background-color: #f9fafb;
 }
 
 footer {
@@ -127,8 +127,8 @@ header {
 }
 
 main {
-  padding-top: 40px;
-  min-height: calc(100vh - 73px);
+  padding: 40px 0;
+  min-height: 100%;
 }
 
 nav {
