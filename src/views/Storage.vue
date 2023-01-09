@@ -77,10 +77,17 @@ export default {
     };
 
     const displayItems = () => {
+      // get all items from storage
       const _items = storage.getAllItems('secret_');
-      items.value = _items;
+      // sort by timestamp
+      const sortedItemsKeys = Object.keys(_items).sort((keyA, keyB) => _items[keyB].timestamp - _items[keyA].timestamp);
+      const sortedItems = {};
+      for (const key of sortedItemsKeys) {
+        sortedItems[key] = _items[key];
+      }
+      // fill values
+      items.value = sortedItems;
       isEmpty.value = (Object.values(_items).length === 0);
-      // console.log('__', items.value, isEmpty.value);
     }
 
     onMounted(() => {
