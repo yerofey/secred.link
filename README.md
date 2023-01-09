@@ -1,5 +1,7 @@
 # secred.app
 
+> Secure any data: password, message or link
+
 ## Project setup
 
 ```bash
@@ -18,12 +20,12 @@ pnpm serve
 pnpm build
 ```
 
-### Lints and fixes files
+## Author
 
-```bash
-pnpm lint
-```
+[Yerofey S.](https://github.com/yerofey)
 
-### Customize configuration
+Contact me: [Email](mailto:pm@yerofey.dev)
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## License
+
+[MIT](https://github.com/yerofey/secred.app/blob/master/LICENSE)
