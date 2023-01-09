@@ -11,14 +11,17 @@
               {{ secretContent }}
             </samp>
           </div>
-          <small v-if="isDeletable" class="text-muted text-center mt-4 d-block">
+          <small class="text-muted mt-2 d-block">
+            created at: {{ secretCreationDate }}
+          </small>
+          <!-- <small v-if="isDeletable" class="text-muted text-center mt-4 d-block">
             <span v-if="canManage">
               This secret can only be read once, then it will be deleted.
             </span>
             <span v-else>
               This secret is already deleted, copy data if you need to save it.
             </span>
-          </small>
+          </small> -->
           <!-- <div v-if="canManage" class="mt-4 mb-2">
             <router-link
               :to="{
@@ -57,6 +60,8 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import Storage from '../modules/storage';
+import human from 'human-time';
+import moment from 'moment';
 // import {
 //   BIconXCircleFill,
 // } from 'bootstrap-icons-vue';
@@ -95,6 +100,7 @@ export default {
     const isReady = ref(false);
     const isProtected = ref(false);
     const secretItem = ref({});
+    const secretCreationDate = ref('');
     const secretContent = ref('');
     const secretPassword = ref('');
     const localItem = ref({});
@@ -119,6 +125,7 @@ export default {
         if (res.status === 200 && res.data) {
           const item = res.data.data;
           secretItem.value = item;
+          secretCreationDate.value = moment(item.creation_date).format('YYYY-MM-DD HH:mm:ss');
           isDeletable.value = false; // item.is_deletable;
           isProtected.value = item.isProtected;
           isFound.value = true;
@@ -228,9 +235,11 @@ export default {
       isFound,
       isLoading,
       isProtected,
+      secretCreationDate,
       secretContent,
       secretPassword,
       submitPassword,
+      human,
     };
   },
 };

@@ -19,6 +19,7 @@
     "dotenv": "^10.0.0",
     "human-time": "^0.0.2",
     "modern-normalize": "^1.1.0",
+    "moment": "^2.29.4",
     "nanoid": "^3.3.4",
     "querystring": "^0.2.1",
     "register-service-worker": "^1.7.2",
