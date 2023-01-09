@@ -8,6 +8,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "@vitejs/plugin-legacy": "^3.0.1",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vueuse/head": "^0.7.13",
     "axios": "^0.24.0",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "eslint": "^7.32.0",
-    "sass": "^1.57.1"
+    "sass": "^1.57.1",
+    "terser": "^5.16.1"
   }
 }
