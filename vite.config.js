@@ -10,7 +10,13 @@ export default defineConfig({
       reactivityTransform: true,
     }),
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: [
+        'defaults',
+        'not IE 11',
+        '> 0.5%',
+        'Firefox ESR',
+        'not dead',
+      ],
       modernPolyfills: true,
     }),
   ],
