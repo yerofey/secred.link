@@ -47,6 +47,7 @@ import {
   // BIconXCircleFill,
 } from 'bootstrap-icons-vue';
 import useClipboard from 'vue-clipboard3';
+import { log } from '../modules/utils';
 
 export default {
   components: {
@@ -77,7 +78,7 @@ export default {
           secretShareLink.value = `${import.meta.env.VITE_APP_URL}/view#${secretItem.value.keys.accessKey}`;
         }
       } else {
-        console.log('NO_KEY');
+        log('NO_KEY');
       }
 
       isLoading.value = false;

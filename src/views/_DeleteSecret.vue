@@ -34,7 +34,6 @@ export default {
 
     const hash = route.hash.substring(1);
     // TODO: validate hash
-    // console.log('hash', hash);
 
     return {
       isLoading,

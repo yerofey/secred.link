@@ -69,6 +69,7 @@ import {
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import { Buffer } from 'buffer';
+import { log } from '../modules/utils';
 
 export default {
   components: {
@@ -124,7 +125,8 @@ export default {
 
       try {
         const res = await axios.get(apiUrl);
-        console.log('API_RES', res.data);
+        // log(`API_RES: ${JSON.stringify(res.data)}`);
+
         if (res.status === 200 && res.data) {
           const item = res.data.data;
           secretItem.value = item;
@@ -156,7 +158,7 @@ export default {
             );
           }
         } else {
-          console.log('API_SECRET_NOT_FOUND');
+          // log('API_SECRET_NOT_FOUND');
           isFound.value = false;
         }
       } catch (err) {
@@ -177,14 +179,14 @@ export default {
         }
 
         //     // if (item.keys.decodeKey !== undefined) {
-        //     //   console.log('IS_OWNER');
+        //     //   log('IS_OWNER');
         //     //   isOwner.value = true;
         //     // }
 
         exists.value = true;
         localItem.value = item;
       } else {
-        console.log('NOT_FOUND');
+        // log('NOT_FOUND');
       }
     };
 
@@ -195,14 +197,12 @@ export default {
 
     // eslint-disable-next-line no-unused-vars
     const decryptSecret = () => {
-      // console.log('decrypt');
       const item = secretItem.value;
       const clientSecretPasswordHash = hashString(inputPassword.value);
       // (isOwner.value ? localItem.value.decodeKey :
       const contentEncryptionString = hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`);
       const contentBase64 = hexToBase64(item.content);
       const testBase64 = hexToBase64(item.test);
-      // console.log('contentEncryptionString', contentEncryptionString);
       // TODO: compare client password hash with passHash
       try {
         // eslint-disable-next-line max-len

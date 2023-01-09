@@ -1,5 +1,9 @@
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+export const log = (msg) => {
+  if (import.meta.env.VITE_ENV === 'production') {
+    return;
+  }
 
-export default {
-  sleep,
+  console.log(msg);
 };
+
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
