@@ -3,7 +3,7 @@
   <div>
     <!-- <h4>View Secret</h4> -->
     <div v-if="isLoading" class="mt-4">Loading secret...</div>
-    <div v-else class="form-container mt-4">
+    <div v-else class="form-container mt-4 pb-5">
       <div v-if="isFound">
         <div v-if="isDecrypted">
           <div class="secret-content d-block border rounded p-3">
@@ -56,16 +56,13 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-// import { useStorage } from 'vue3-storage';
 import Storage from '../modules/storage';
-// import { customAlphabet } from 'nanoid';
 // import {
 //   BIconXCircleFill,
 // } from 'bootstrap-icons-vue';
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 
-// const { Buffer } = require('buffer');
 import { Buffer } from 'buffer';
 
 export default {
@@ -75,11 +72,8 @@ export default {
   setup() {
     const CryptoJS = inject('cryptojs');
     const route = useRoute();
-    // const storage = useStorage();
     const storage = new Storage();
 
-    // const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    // const nanoid = customAlphabet(symbolsString, 16);
     const hashString = (string) => CryptoJS.SHA256(string).toString();
     const hexToBase64 = (string) => Buffer.from(string, 'hex').toString('base64');
     const lifetimeSeconds = 30 * 24 * (60 * 60 * 1000); // 30 days
@@ -107,6 +101,8 @@ export default {
 
     const getItemData = async () => {
       if (accessKey.length !== 17) {
+        isFound.value = false;
+        isLoading.value = false;
         return;
       }
 
@@ -119,6 +115,7 @@ export default {
 
       try {
         const res = await axios.get(apiUrl);
+        console.log('API_RES', res.data);
         if (res.status === 200 && res.data) {
           const item = res.data.data;
           secretItem.value = item;
@@ -149,6 +146,7 @@ export default {
             );
           }
         } else {
+          console.log('API_SECRET_NOT_FOUND');
           isFound.value = false;
         }
       } catch (err) {

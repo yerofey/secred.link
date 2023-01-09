@@ -50,9 +50,15 @@ export default {
 
 <style lang="scss">
 html,
-body,
 #app {
   height: 100%;
+}
+
+body {
+  position: relative;
+
+  height: auto;
+  min-height: 100vh;
 }
 
 #app {
@@ -122,8 +128,7 @@ header {
 
 main {
   padding-top: 40px;
-  // height: 100%;
-  // min-height: calc(100% - 130px);
+  min-height: calc(100vh - 73px);
 }
 
 nav {

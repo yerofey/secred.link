@@ -48,7 +48,6 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-// import { useStorage } from 'vue3-storage';
 import Storage from '../modules/storage';
 import human from 'human-time';
 import {
