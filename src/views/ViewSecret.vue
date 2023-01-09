@@ -4,48 +4,49 @@
     <!-- <h4>View Secret</h4> -->
     <div v-if="isLoading" class="mt-4">Loading secret...</div>
     <div v-else class="form-container mt-4 pb-5">
-      <div v-if="isFound">
-        <div v-if="isDecrypted">
-          <div class="secret-content d-block border rounded p-3">
-            <samp>
-              {{ secretContent }}
-            </samp>
+      <div v-if="!isDeleted">
+        <div v-if="isFound">
+          <div v-if="isDecrypted">
+            <div class="secret-content d-block border rounded p-3">
+              <samp>
+                {{ secretContent }}
+              </samp>
+            </div>
+            <small class="text-muted mt-2 d-block">
+              created at: {{ secretCreationDate }}
+            </small>
+            <!-- <small v-if="isDeletable" class="text-muted text-center mt-4 d-block">
+              <span v-if="canManage">
+                This secret can only be read once, then it will be deleted.
+              </span>
+              <span v-else>
+                This secret is already deleted, copy data if you need to save it.
+              </span>
+            </small> -->
+            <div class="mt-4">
+              <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
+                <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
+              </button>
+            </div>
           </div>
-          <small class="text-muted mt-2 d-block">
-            created at: {{ secretCreationDate }}
-          </small>
-          <!-- <small v-if="isDeletable" class="text-muted text-center mt-4 d-block">
-            <span v-if="canManage">
-              This secret can only be read once, then it will be deleted.
-            </span>
-            <span v-else>
-              This secret is already deleted, copy data if you need to save it.
-            </span>
-          </small> -->
-          <!-- <div v-if="canManage" class="mt-4 mb-2">
-            <router-link
-              :to="{
-                name: '1delete',
-                hash: `#${manageKey}`,
-              }"
-              class="btn btn-outline-secondary btn-sm"
-            ><BIconXCircleFill/> <span class="span-after-icon">Delete this secret</span></router-link>
-          </div> -->
+          <div v-else>
+            <form @submit.prevent="submitPassword">
+              <div class="py-3">
+                <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
+                <input type="text" class="form-control" placeholder="Enter passphrase to decrypt secret" v-model="secretPassword">
+              </div>
+              <div class="">
+                <button class="btn btn-primary" type="submit">Unlock</button>
+              </div>
+            </form>
+          </div>
         </div>
         <div v-else>
-          <form @submit.prevent="submitPassword">
-            <div class="py-3">
-              <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-              <input type="text" class="form-control" placeholder="Enter passphrase to decrypt secret" v-model="secretPassword">
-            </div>
-            <div class="">
-              <button class="btn btn-primary" type="submit">Unlock</button>
-            </div>
-          </form>
+          Secret not found!
         </div>
       </div>
       <div v-else>
-        Secret not found!
+        Secret is successfully deleted!
       </div>
     </div>
   </div>
@@ -62,18 +63,17 @@ import { useRoute } from 'vue-router';
 import Storage from '../modules/storage';
 import human from 'human-time';
 import moment from 'moment';
-// import {
-//   BIconXCircleFill,
-// } from 'bootstrap-icons-vue';
+import {
+  BIconXCircleFill,
+} from 'bootstrap-icons-vue';
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
-
 import { Buffer } from 'buffer';
 
 export default {
-  // components: {
-  //   BIconXCircleFill,
-  // },
+  components: {
+    BIconXCircleFill,
+  },
   setup() {
     const CryptoJS = inject('cryptojs');
     const route = useRoute();
@@ -93,6 +93,7 @@ export default {
     const canManage = ref(false);
     const isOwner = ref(false);
     const manageKey = ref('');
+    const isDeleted = ref(false);
     const isDecrypted = ref(false);
     const isDeletable = ref(false);
     const isFound = ref(false);
@@ -168,11 +169,10 @@ export default {
       if (storage.hasKey(secretKey)) {
         const item = storage.getItem(secretKey);
 
-        // TODO:
-        //     if (item.keys.manageKey !== undefined) {
-        //       canManage.value = true;
-        //       manageKey.value = item.keys.manageKey;
-        //     }
+        if (item.keys.manageKey !== undefined) {
+          canManage.value = true;
+          manageKey.value = item.keys.manageKey;
+        }
 
         //     // if (item.keys.decodeKey !== undefined) {
         //     //   console.log('IS_OWNER');
@@ -185,6 +185,11 @@ export default {
         console.log('NOT_FOUND');
       }
     };
+
+    const deleteItemFromDevice = () => {
+      storage.removeItem(`secret_${sid}`);
+      isDeleted.value = true;
+    }
 
     // eslint-disable-next-line no-unused-vars
     const decryptSecret = () => {
@@ -231,6 +236,7 @@ export default {
       canManage,
       manageKey,
       isDecrypted,
+      isDeleted,
       isDeletable,
       isFound,
       isLoading,
@@ -238,6 +244,7 @@ export default {
       secretCreationDate,
       secretContent,
       secretPassword,
+      deleteItemFromDevice,
       submitPassword,
       human,
     };
