@@ -39,7 +39,7 @@
         <div v-else>
           Secret not found!
         </div>
-        <div class="mt-4">
+        <div v-if="isFound" class="mt-4">
           <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
             <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
           </button>
@@ -94,6 +94,7 @@ export default {
     const canManage = ref(false);
     const isOwner = ref(false);
     const manageKey = ref('');
+    const isBurnable = ref(false);
     const isDeleted = ref(false);
     const isDecrypted = ref(false);
     const isDeletable = ref(false);
@@ -131,6 +132,7 @@ export default {
           const item = res.data.data;
           secretItem.value = item;
           secretCreationDate.value = moment(item.creation_date).format('YYYY-MM-DD HH:mm:ss');
+          isBurnable.value = item.is_burnable;
           isDeletable.value = false; // item.is_deletable;
           isProtected.value = item.isProtected;
           isFound.value = true;
@@ -156,6 +158,10 @@ export default {
               },
               lifetimeSeconds * 1000,
             );
+          }
+
+          if (isBurnable.value) {
+            console.log('IS_BURNABLE');
           }
         } else {
           // log('API_SECRET_NOT_FOUND');

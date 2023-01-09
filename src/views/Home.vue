@@ -8,7 +8,7 @@
       <h5>Secure any data: password, message or link</h5>
       <h6>Keep sensitive info out of your chats and notes</h6>
     </div>
-    <div class="mb-3">
+    <div>
       <textarea
         class="form-control"
         maxlength="2048"
@@ -19,39 +19,47 @@
         v-model="secretContent"
       ></textarea>
     </div>
-    <div class="mb-1 input-group text-center text-muted">
-      <small class="mx-auto">OPTIONAL</small>
+    <div class="group-optional mt-4 mb-4">
+      <div class="mb-2 input-group text-muted">
+        <small>OPTIONAL</small>
+      </div>
+      <div class="mb-3 input-group">
+        <label class="input-group-text" for="inputGroupSelect01">Password</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputGroupSelect01"
+          placeholder="Passphrase to access your secret"
+          autocomplete="off"
+          maxlength="64"
+          v-model="secretPassword"
+        />
+      </div>
+      <div class="mb-3 input-group">
+        <label class="input-group-text" for="inputGroupSelect02">Expires In</label>
+        <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
+          <option :value="5 * 60">5 minutes</option>
+          <option :value="10 * 60">10 minutes</option>
+          <option :value="30 * 60">30 minutes</option>
+          <option :value="60 * 60">60 minutes</option>
+          <option :value="3 * 60 * 60">3 hours</option>
+          <option :value="6 * 60 * 60">6 hours</option>
+          <option :value="12 * 60 * 60">12 hours</option>
+          <option :value="24 * 60 * 60">24 hours</option>
+          <option :value="3 * 24 * 60 * 60">3 days</option>
+          <option :value="7 * 24 * 60 * 60">7 days</option>
+          <option :value="14 * 24 * 60 * 60">14 days</option>
+          <option :value="30 * 24 * 60 * 60" selected>30 days</option>
+        </select>
+      </div>
+      <div class="input-check">
+        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="secretIsBurnable">
+        <label class="form-check-label" for="flexCheckDefault">
+          &nbsp; Burn after read
+        </label>
+      </div>
     </div>
-    <div class="mb-4 input-group">
-      <label class="input-group-text" for="inputGroupSelect01">Password</label>
-      <input
-        type="text"
-        class="form-control"
-        id="inputGroupSelect01"
-        placeholder="Passphrase to access your secret"
-        autocomplete="off"
-        maxlength="64"
-        v-model="secretPassword"
-      />
-    </div>
-    <!-- <div class="mb-3 input-group">
-      <label class="input-group-text" for="inputGroupSelect02">Expires In</label>
-      <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
-        <option :value="5 * 60">5 minutes</option>
-        <option :value="10 * 60">10 minutes</option>
-        <option :value="30 * 60">30 minutes</option>
-        <option :value="60 * 60">60 minutes</option>
-        <option :value="3 * 60 * 60">3 hours</option>
-        <option :value="6 * 60 * 60">6 hours</option>
-        <option :value="12 * 60 * 60">12 hours</option>
-        <option :value="24 * 60 * 60">24 hours</option>
-        <option :value="3 * 24 * 60 * 60" selected>3 days</option>
-        <option :value="7 * 24 * 60 * 60">7 days</option>
-        <option :value="14 * 24 * 60 * 60">14 days</option>
-        <option :value="30 * 24 * 60 * 60">30 days</option>
-      </select>
-    </div> -->
-    <div class="mb-3">
+    <div class="mb-3 form-buttons">
       <button
         @click="processForm"
         type="button"
@@ -82,6 +90,7 @@ import axios from 'axios';
 import querystring from 'querystring';
 import Storage from '../modules/storage';
 import { Buffer } from 'buffer';
+import { log } from './../modules/utils';
 
 export default {
   components: {
@@ -96,7 +105,8 @@ export default {
     const submitInProcess = ref(false);
     const secretContent = ref('');
     const secretPassword = ref('');
-    const secretLifetime = ref((3 * 24 * 60 * 60));
+    const secretLifetime = ref((30 * 24 * 60 * 60));
+    const secretIsBurnable = ref(false);
 
     const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const nanoid = customAlphabet(symbolsString, 16);
@@ -140,7 +150,7 @@ export default {
       const secretIsProtectedWithPassword = (secretPassword.value.length > 0);
       // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
       const sid = hashString(accessKeyHash2).slice(0, 20);
-      const dataHash = hashString(`${accessKeyHash2}${manageKeyHash2}${contentHexHash}${secretIsProtectedWithPassword}`);
+      const dataHash = hashString(`${accessKeyHash2}${manageKeyHash2}${contentHexHash}${secretIsProtectedWithPassword}${secretLifetime.value}${secretIsBurnable.value}`); // hash to check if secret was changed
 
       // save on the API
       const secretData = {
@@ -149,14 +159,15 @@ export default {
         contentHash: encryptedSecretContent,
         testHash,
         isProtected: secretIsProtectedWithPassword,
+        isBurnable: secretIsBurnable.value,
         lifetime: secretLifetime.value,
         v: import.meta.env.VITE_VERSION_PREFIX,
       };
-      console.log('secret', secretData);
+      log(`secret: ${secretData}`);
       const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
       const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
       if (res.status === 200 && res.data.data.success === true) {
-        console.log('SECRED_SAVED', res.data.data);
+        log(`SECRED_SAVED ${JSON.stringify(res.data.data)}`);
         // save into storage
         storage.setItem(
           `secret_${sid}`,
@@ -171,6 +182,7 @@ export default {
             isOwner: true,
             isEncoded: false,
             hasPassword: secretIsProtectedWithPassword,
+            isBurnable: secretIsBurnable.value,
             timestamp: Math.floor(Date.now()),
             v: import.meta.env.VITE_STORAGE_VERSION,
           },
@@ -180,7 +192,7 @@ export default {
         router.push({ path: '/new', hash: `#${sid}` });
       } else {
         // TODO: error
-        console.error('FAILED_TO_CREATE');
+        log('FAILED_TO_CREATE');
       }
     };
 
@@ -195,6 +207,7 @@ export default {
       secretContent,
       secretPassword,
       secretLifetime,
+      secretIsBurnable,
       processForm,
     };
   },
@@ -203,6 +216,22 @@ export default {
 
 <style lang="scss" scoped>
 .form-container {
+  .group-optional {
+    padding: 5px 0 5px 15px;
+    border-left: 2px solid #ccc;
+    // border-right: 2px solid #ccc;
+  }
+
+  .input-check {
+    text-align: left;
+
+    user-select: none;
+  }
+
+  .form-buttons {
+    text-align: left;
+  }
+
   .submit-button.is-loading {
     cursor: wait !important;
     pointer-events: all !important;
