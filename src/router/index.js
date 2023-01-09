@@ -5,6 +5,8 @@ import NewSecret from '../views/NewSecret.vue';
 // import DeleteSecret from '../views/_DeleteSecret.vue';
 import ViewSecret from '../views/ViewSecret.vue';
 
+// base: import.meta.env.BASE_URL,
+
 const routes = [
   {
     path: '/',
@@ -42,7 +44,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(), // import.meta.env.BASE_URL
   routes,
 });
 
