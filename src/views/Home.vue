@@ -154,10 +154,8 @@ export default {
       const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
       const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
       if (res.status === 200 && res.data.data.success === true) {
-        // TODO: check res
         console.log('SECRED_SAVED', res.data.data);
         // save into storage
-        // storage.setStorageSync
         storage.setItem(
           `secret_${sid}`,
           {
@@ -177,9 +175,7 @@ export default {
           (secretLifetime.value * 1000),
         );
         // go to editing page
-        setTimeout(() => {
-          router.push({ path: '/new', hash: `#${sid}` });
-        }, 100);
+        router.push({ path: '/new', hash: `#${sid}` });
       } else {
         // TODO: error
         console.error('FAILED_TO_CREATE');
