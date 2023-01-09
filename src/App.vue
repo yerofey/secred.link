@@ -8,11 +8,11 @@
           <span class="project-title">Secred</span>
           <span class="project-subtitle">β</span>
         </router-link>
-        <!-- <div class="app-buttons">
+        <div class="app-buttons">
           <router-link to="/storage" class="storage-link btn d-block link-dark text-decoration-none">
-            <BIconGridFill/>
+            <BIconBookmarkStarFill/>
           </router-link>
-        </div> -->
+        </div>
       </div>
     </div>
   </header>
@@ -21,18 +21,30 @@
       <router-view/>
     </div>
   </main>
+  <footer style="display: none;">
+    <small>{{ projectVersion }}</small>
+  </footer>
 </template>
 
 <script>
-// import {
-//   BIconGridFill, // Grid | Bookmark
-// } from 'bootstrap-icons-vue';
+import {
+  // BIconGridFill, // Grid | Bookmark
+  BIconBookmarkStarFill,
+} from 'bootstrap-icons-vue';
+import packageJSON from '../package.json';
 
 export default {
   components: {
     // BIconGridFill,
-    // BIconBookmarkStar,
+    BIconBookmarkStarFill,
   },
+  setup() {
+    const projectVersion = packageJSON.version;
+
+    return {
+      projectVersion,
+    }
+  }
 };
 </script>
 
