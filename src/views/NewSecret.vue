@@ -74,7 +74,7 @@ export default {
         secretItem.value = storage.getItem(secretKey);
 
         if (secretItem.value.keys.accessKey !== undefined) {
-          secretShareLink.value = `${import.meta.env.VITE_URL}/view#${secretItem.value.keys.accessKey}`;
+          secretShareLink.value = `${import.meta.env.VITE_APP_URL}/view#${secretItem.value.keys.accessKey}`;
         }
       } else {
         console.log('NO_KEY');
