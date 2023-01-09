@@ -8,6 +8,9 @@
         <div v-if="isFound">
           <div v-if="isDecrypted">
             <div class="secret-content d-block border rounded p-3">
+              <span v-if="isBurnable" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                Burned!
+              </span>
               <samp>
                 {{ secretContent }}
               </samp>
@@ -15,14 +18,6 @@
             <small class="text-muted mt-2 d-block">
               created at: {{ secretCreationDate }}
             </small>
-            <!-- <small v-if="isDeletable" class="text-muted text-center mt-4 d-block">
-              <span v-if="canManage">
-                This secret can only be read once, then it will be deleted.
-              </span>
-              <span v-else>
-                This secret is already deleted, copy data if you need to save it.
-              </span>
-            </small> -->
           </div>
           <div v-else>
             <form @submit.prevent="submitPassword">
@@ -132,7 +127,7 @@ export default {
           const item = res.data.data;
           secretItem.value = item;
           secretCreationDate.value = moment(item.creation_date).format('YYYY-MM-DD HH:mm:ss');
-          isBurnable.value = item.is_burnable;
+          isBurnable.value = item.isBurnable;
           isDeletable.value = false; // item.is_deletable;
           isProtected.value = item.isProtected;
           isFound.value = true;
@@ -257,6 +252,7 @@ export default {
       canManage,
       manageKey,
       exists,
+      isBurnable,
       isDecrypted,
       isDeleted,
       isDeletable,
@@ -278,6 +274,8 @@ export default {
 
 <style lang="scss" scoped>
 .secret-content {
+  position: relative;
+
   background-color: #fff;
 }
 </style>
