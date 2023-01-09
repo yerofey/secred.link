@@ -14,7 +14,6 @@
         maxlength="2048"
         rows="4"
         placeholder="Insert the content you want to secure..."
-        autofocus
         autocorrect="off"
         v-model="secretContent"
       ></textarea>
@@ -36,7 +35,7 @@
         />
       </div>
       <div class="mb-3 input-group">
-        <label class="input-group-text" for="inputGroupSelect02">Expires In</label>
+        <label class="input-group-text" for="inputGroupSelect02">Expires in</label>
         <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
           <option :value="5 * 60">5 minutes</option>
           <option :value="10 * 60">10 minutes</option>
