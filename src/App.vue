@@ -22,7 +22,7 @@
     </div>
   </main>
   <footer style="display: none;">
-    <small>{{ projectVersion }}</small>
+    <!-- <small>{{ projectVersion }}</small> -->
   </footer>
 </template>
 
@@ -31,7 +31,7 @@ import {
   // BIconGridFill, // Grid | Bookmark
   BIconBookmarkStarFill,
 } from 'bootstrap-icons-vue';
-import packageJSON from '../package.json';
+// import packageJSON from '../package.json';
 
 export default {
   components: {
@@ -39,11 +39,11 @@ export default {
     BIconBookmarkStarFill,
   },
   setup() {
-    const projectVersion = packageJSON.version;
+    // const projectVersion = packageJSON.version;
 
-    return {
-      projectVersion,
-    }
+    // return {
+    //   projectVersion,
+    // }
   }
 };
 </script>
