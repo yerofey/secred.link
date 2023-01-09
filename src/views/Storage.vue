@@ -1,11 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
-    <h4>Local Storage</h4>
+    <h4>Saved Secrets</h4>
     <div v-if="isLoading" class="mt-4">Loading info...</div>
     <div v-else class="form-container mt-4">
-      <div class="secret-items mb-3" v-if="!storageIsEmpty">
-        <router-link v-for="item in items" :key="item.uuid" class="card secret-item" :to="{
+      <div class="secret-items mb-3" v-if="items.length > 0">
+        <router-link v-for="item in items" :key="item.sid" class="card secret-item" :to="{
             name: 'view',
             hash: `#${item.keys.accessKey}`,
           }">
@@ -24,7 +24,7 @@
               <!-- eslint-disable-next-line vue/no-parsing-error -->
             </p>
             <span class="secret-date">
-              {{ item.displayDate }}
+              {{ human(new Date(item.timestamp)) }}
             </span>
           </div>
         </router-link>
@@ -34,10 +34,10 @@
       </div>
       <div class="mb-4">
         <small class="text-muted">
-          Keys for these secrets are stored on this device only.
+          Secrets are saved on this device.
         </small>
       </div>
-      <div class="mb-3" v-if="!storageIsEmpty">
+      <div class="mb-3" v-if="items.length > 0">
         <button @click="clearStorage" type="button" class="btn btn-sm btn-outline-danger">
           <BIconTrash2Fill/> <span class="span-after-icon">Clear device cache</span>
         </button>
@@ -48,7 +48,8 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { useStorage } from 'vue3-storage';
+// import { useStorage } from 'vue3-storage';
+import Storage from '../modules/storage';
 import human from 'human-time';
 import {
   BIconTrash2Fill,
@@ -63,50 +64,19 @@ export default {
     BIconUnlockFill,
   },
   setup() {
-    const localStorage = useStorage();
+    const storage = new Storage();
 
     const isLoading = ref(false);
     const items = ref({});
-    const storageIsEmpty = ref(true);
-
-    // console.log('storage', localStorage.getStorageInfoSync());
 
     const clearStorage = () => {
-      localStorage.clearStorageSync();
-      // TODO: check if emptied
+      storage.removeAllItems('secret_');
       items.value = {};
-      storageIsEmpty.value = true;
     };
 
     const displayItems = () => {
-      const itemsObject = {};
-      if (localStorage.getStorageInfoSync().keys.length > 0) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const key of localStorage.getStorageInfoSync().keys) {
-          if (key.includes(`${process.env.VUE_APP_STORAGE_PREFIX}`)) {
-            // eslint-disable-next-line prefer-const
-            const secretInfo = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
-            const newItem = { ...secretInfo };
-            // console.log('item', newItem);
-            // TODO: validate required keys
-            // eslint-disable-next-line max-len
-            const itemTimestamp = (secretInfo.timestamp !== undefined ? (secretInfo.timestamp * 1000) : Date.now());
-            newItem.displayDate = human(new Date(itemTimestamp));
-            itemsObject[secretInfo.sid] = newItem;
-          }
-        }
-      }
-
-      // eslint-disable-next-line max-len
-      const sortedItemsKeys = Object.keys(itemsObject).sort((keyA, keyB) => itemsObject[keyB].timestamp - itemsObject[keyA].timestamp);
-      const sortedItems = {};
-      sortedItemsKeys.forEach((key) => {
-        sortedItems[key] = itemsObject[key];
-      });
-
-      storageIsEmpty.value = sortedItems.length === 0;
-      items.value = sortedItems;
-    };
+      items.value = storage.getAllItems('secret_');
+    }
 
     onMounted(() => {
       displayItems();
@@ -115,7 +85,7 @@ export default {
     return {
       isLoading,
       clearStorage,
-      storageIsEmpty,
+      human,
       items,
     };
   },

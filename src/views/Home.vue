@@ -59,7 +59,8 @@
         :disabled="!submitIsEnabled"
       >
         <!-- eslint-disable-next-line max-len -->
-        <BIconPlusCircleFill /> <span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
+        <BIconPlusCircleFill />
+        <span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
       </button>
     </div>
   </form>
@@ -73,14 +74,12 @@ import {
   // onMounted,
 } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStorage } from 'vue3-storage';
 import { customAlphabet } from 'nanoid';
 import { BIconPlusCircleFill } from 'bootstrap-icons-vue';
-// eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import querystring from 'querystring';
-
-const { Buffer } = require('buffer/');
+import Storage from '../modules/storage';
+import { Buffer } from 'buffer';
 
 export default {
   components: {
@@ -89,7 +88,7 @@ export default {
   setup() {
     const CryptoJS = inject('cryptojs');
     const router = useRouter();
-    const localStorage = useStorage();
+    const storage = new Storage();
 
     const submitIsEnabled = ref(false);
     const submitInProcess = ref(false);
@@ -103,19 +102,15 @@ export default {
     const base64ToHex = (str) => Buffer.from(str, 'base64').toString('hex');
 
     // eslint-disable-next-line no-promise-executor-return
-    // const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const processForm = async () => {
       // add loading status
       submitInProcess.value = true;
       // disable submit button
       submitIsEnabled.value = false;
-      // if (process.env.VUE_APP_ENV === 'local') {
-      //   await sleep(30000);
-      // }
+
       const clientSecretContent = secretContent.value;
       const clientSecretPassword = secretPassword.value;
-      const prefix = `${process.env.VUE_APP_VERSION_PREFIX}`;
-      const uuid = nanoid();
+      const prefix = `${import.meta.env.VITE_VERSION_PREFIX}`;
       const clientSecretPasswordHash = hashString(clientSecretPassword);
       // const passHash = hashString(clientSecretPasswordHash);
       const accessKey = prefix + nanoid();
@@ -129,7 +124,7 @@ export default {
       );
       const testHash = base64ToHex(
         CryptoJS.AES.encrypt(
-          process.env.VUE_APP_TEST_STRING,
+          import.meta.env.VITE_TEST_STRING,
           contentEncryptionString,
         ).toString(),
       );
@@ -139,7 +134,11 @@ export default {
         contentEncryptionString,
       ).toString();
       const encryptedSecretContent = base64ToHex(encryptedSecretContentBase64);
+      const contentHexHash = hashString(encryptedSecretContent);
+      const secretIsProtectedWithPassword = false;
       // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
+      const sid = hashString(accessKeyHash2).slice(0, 20);
+      const dataHash = hashString(`${accessKeyHash2}${manageKeyHash2}${contentHexHash}${secretIsProtectedWithPassword}`);
 
       // save on the API
       const secretData = {
@@ -149,48 +148,43 @@ export default {
         testHash,
         isProtected: false, // (secretPassword.value.length > 0),
         lifetime: secretLifetime.value,
-        v: process.env.VUE_APP_VERSION_PREFIX,
+        v: import.meta.env.VITE_VERSION_PREFIX,
       };
-      // console.log('secret', accessKeyHash2, secretData);
-      const createSecretUrl = `${process.env.VUE_APP_API_URL}/secret/create`;
+      // console.log('secret', accessKeyHash2, dataHash);
+      const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
       const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
       if (res.status === 200 && res.data.data.success === true) {
-        // console.log('SECRED_SAVED', res.data);
-        // add loading status
-        // submitInProcess.value = false;
-        // disable submit button
-        // submitIsEnabled.value = true;
-        // save into localstorage
-        localStorage.setStorageSync(
-          `${uuid}`,
+        // TODO: check res
+        console.log('SECRED_SAVED', res.data.data);
+        // save into storage
+        // storage.setStorageSync
+        storage.setItem(
+          `secret_${sid}`,
           {
-            sid: uuid,
+            sid,
+            hash: dataHash,
             keys: {
               accessKey,
               manageKey,
               decodeKey: contentEncryptionString,
             },
-            hasPassword: false, // (secretPassword.value.length > 0),
-            // date: new Date(),
-            timestamp: Math.floor(Date.now() / 1000),
+            isOwner: true,
+            isEncoded: false,
+            hasPassword: secretIsProtectedWithPassword, // (secretPassword.value.length > 0),
+            timestamp: Math.floor(Date.now()),
+            v: import.meta.env.VITE_STORAGE_VERSION,
           },
-          secretLifetime.value,
+          (secretLifetime.value * 1000),
         );
         // go to editing page
-        router.push({ path: '/new', hash: `#${manageKey}` });
-        // setTimeout(() => {
-        //   router.push({ path: '/view', hash: `#${accessKey}` });
-        // }, 250);
+        setTimeout(() => {
+          router.push({ path: '/new', hash: `#${sid}` });
+        }, 100);
       } else {
         // TODO: error
         console.error('FAILED_TO_CREATE');
       }
     };
-
-    // init
-    // onMounted(() => {
-    //   console.log('INIT');
-    // });
 
     // eslint-disable-next-line no-unused-vars
     watch(secretContent, (newVal, oldVal) => {

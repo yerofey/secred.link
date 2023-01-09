@@ -28,13 +28,13 @@ export default {
   },
   setup() {
     const route = useRoute();
-    // const localStorage = useStorage();
+    // const storage = useStorage();
 
     const isLoading = ref(false);
 
     const hash = route.hash.substring(1);
     // TODO: validate hash
-    console.log('hash', hash);
+    // console.log('hash', hash);
 
     return {
       isLoading,

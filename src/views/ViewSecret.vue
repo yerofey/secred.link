@@ -56,15 +56,17 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStorage } from 'vue3-storage';
-import { customAlphabet } from 'nanoid';
+// import { useStorage } from 'vue3-storage';
+import Storage from '../modules/storage';
+// import { customAlphabet } from 'nanoid';
 // import {
 //   BIconXCircleFill,
 // } from 'bootstrap-icons-vue';
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 
-const { Buffer } = require('buffer');
+// const { Buffer } = require('buffer');
+import { Buffer } from 'buffer';
 
 export default {
   // components: {
@@ -73,10 +75,11 @@ export default {
   setup() {
     const CryptoJS = inject('cryptojs');
     const route = useRoute();
-    const localStorage = useStorage();
+    // const storage = useStorage();
+    const storage = new Storage();
 
-    const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const nanoid = customAlphabet(symbolsString, 16);
+    // const symbolsString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    // const nanoid = customAlphabet(symbolsString, 16);
     const hashString = (string) => CryptoJS.SHA256(string).toString();
     const hexToBase64 = (string) => Buffer.from(string, 'hex').toString('base64');
     const lifetimeSeconds = 30 * 24 * (60 * 60 * 1000); // 30 days
@@ -85,6 +88,7 @@ export default {
     const accessKeyHash1 = hashString(accessKey);
     const accessKeyHash2 = hashString(accessKeyHash1);
     const prefix = accessKey.substring(0, 1);
+    const sid = hashString(accessKeyHash2).slice(0, 20);
 
     const exists = ref(false);
     const canManage = ref(false);
@@ -102,8 +106,11 @@ export default {
     const localItem = ref({});
 
     const getItemData = async () => {
-      // console.log('get_item');
-      const apiUrl = `${process.env.VUE_APP_API_URL}/secret/get/${accessKeyHash2}`;
+      if (accessKey.length !== 17) {
+        return;
+      }
+
+      const apiUrl = `${import.meta.env.VITE_API_URL}/secret/get/${accessKeyHash2}`;
       // if (canManage.value === true) {
       //   const manageKeyHash1 = hashString(manageKey.value);
       //   const manageKeyHash2 = hashString(manageKeyHash1);
@@ -114,7 +121,6 @@ export default {
         const res = await axios.get(apiUrl);
         if (res.status === 200 && res.data) {
           const item = res.data.data;
-          // console.log('item', item); // accessKeyHash2
           secretItem.value = item;
           isDeletable.value = false; // item.is_deletable;
           isProtected.value = item.isProtected;
@@ -122,22 +128,24 @@ export default {
           isReady.value = true;
 
           // save item in local storage
-          const saveLocally = false;
-          if (!exists.value && saveLocally) {
-            // console.log('SAVE_LOCAL_ITEM');
-            const uuid = nanoid();
-            localStorage.setStorageSync(
-              `${uuid}`,
+          const saveLocally = true;
+          const secretKey = `secret_${sid}`;
+          const secretV = accessKey.slice(0, 1);
+          if (!exists.value && !storage.hasKey(secretKey) && saveLocally) {
+            storage.setItem(
+              secretKey,
               {
-                sid: uuid,
+                sid,
                 keys: {
                   accessKey,
                 },
+                isOwner: false,
+                isEncoded: false,
                 hasPassword: isProtected.value,
-                timestamp: Math.floor(Date.now() / 1000),
-                // date: new Date(),
+                timestamp: Math.floor(Date.now()),
+                v: secretV,
               },
-              lifetimeSeconds,
+              lifetimeSeconds * 1000,
             );
           }
         } else {
@@ -151,26 +159,25 @@ export default {
     };
 
     const updateRights = () => {
-      // console.log('update_rights');
-      // eslint-disable-next-line no-restricted-syntax
-      for (const key of localStorage.getStorageInfoSync().keys) {
-        const item = localStorage.getStorageSync(key.replace(`${process.env.VUE_APP_STORAGE_PREFIX}`, ''));
-        if (item !== undefined && item.keys.accessKey === accessKey) {
-          // console.log('found', item);
-          exists.value = true;
-          localItem.value = item;
+      const secretKey = `secret_${sid}`;
+      if (storage.hasKey(secretKey)) {
+        const item = storage.getItem(secretKey);
 
-          if (item.keys.manageKey !== undefined) {
-            canManage.value = true;
-            manageKey.value = item.keys.manageKey;
-          }
+        // TODO:
+        //     if (item.keys.manageKey !== undefined) {
+        //       canManage.value = true;
+        //       manageKey.value = item.keys.manageKey;
+        //     }
 
-          // if (item.keys.decodeKey !== undefined) {
-          //   console.log('IS_OWNER');
-          //   isOwner.value = true;
-          // }
-          break;
-        }
+        //     // if (item.keys.decodeKey !== undefined) {
+        //     //   console.log('IS_OWNER');
+        //     //   isOwner.value = true;
+        //     // }
+
+        exists.value = true;
+        localItem.value = item;
+      } else {
+        console.log('NOT_FOUND');
       }
     };
 
@@ -187,7 +194,7 @@ export default {
       try {
         // eslint-disable-next-line max-len
         const decryptedTest = CryptoJS.AES.decrypt(testBase64, contentEncryptionString).toString(CryptoJS.enc.Utf8);
-        if (decryptedTest === process.env.VUE_APP_TEST_STRING) {
+        if (decryptedTest === import.meta.env.VITE_TEST_STRING) {
           isDecrypted.value = true;
         }
         // TODO: on failed decryption
@@ -212,10 +219,7 @@ export default {
 
     onMounted(() => {
       updateRights();
-
-      if (accessKey.length === 17) {
-        getItemData();
-      }
+      getItemData();
     });
 
     return {
