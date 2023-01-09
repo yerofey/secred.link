@@ -59,8 +59,7 @@
         :disabled="!submitIsEnabled"
       >
         <!-- eslint-disable-next-line max-len -->
-        <BIconPlusCircleFill />
-        <span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
+        <BIconPlusCircleFill />&nbsp;<span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
       </button>
     </div>
   </form>
@@ -74,6 +73,7 @@ import {
   // onMounted,
 } from 'vue';
 import { useRouter } from 'vue-router';
+import { NForm, NInput } from 'naive-ui';
 import { customAlphabet } from 'nanoid';
 import { BIconPlusCircleFill } from 'bootstrap-icons-vue';
 import axios from 'axios';
@@ -84,6 +84,7 @@ import { Buffer } from 'buffer';
 export default {
   components: {
     BIconPlusCircleFill,
+    NForm, NInput,
   },
   setup() {
     const CryptoJS = inject('cryptojs');
