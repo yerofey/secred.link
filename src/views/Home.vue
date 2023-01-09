@@ -22,7 +22,7 @@
     <div class="mb-1 input-group text-center text-muted">
       <small class="mx-auto">OPTIONAL</small>
     </div>
-    <div class="mb-3 input-group">
+    <div class="mb-4 input-group">
       <label class="input-group-text" for="inputGroupSelect01">Password</label>
       <input
         type="text"
