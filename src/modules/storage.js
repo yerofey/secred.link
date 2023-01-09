@@ -1,8 +1,4 @@
 class Storage {
-  fixOldKeys() {
-
-  }
-
   getItem(key) {
     const itemStr = localStorage.getItem(key);
 
