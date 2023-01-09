@@ -4,7 +4,7 @@
     <h4>Saved Secrets</h4>
     <div v-if="isLoading" class="mt-4">Loading info...</div>
     <div v-else class="form-container mt-4">
-      <div class="secret-items mb-3" v-if="items.length > 0">
+      <div class="secret-items mb-3" v-if="!isEmpty">
         <router-link v-for="item in items" :key="item.sid" class="card secret-item" :to="{
             name: 'view',
             hash: `#${item.keys.accessKey}`,
@@ -37,7 +37,7 @@
           Secrets are saved on this device.
         </small>
       </div>
-      <div class="mb-3" v-if="items.length > 0">
+      <div class="mb-3" v-if="!isEmpty">
         <button @click="clearStorage" type="button" class="btn btn-sm btn-outline-danger">
           <BIconTrash2Fill/> <span class="span-after-icon">Clear device cache</span>
         </button>
@@ -67,15 +67,20 @@ export default {
     const storage = new Storage();
 
     const isLoading = ref(false);
+    const isEmpty = ref(true);
     const items = ref({});
 
     const clearStorage = () => {
       storage.removeAllItems('secret_');
       items.value = {};
+      isEmpty.value = true;
     };
 
     const displayItems = () => {
-      items.value = storage.getAllItems('secret_');
+      const _items = storage.getAllItems('secret_');
+      items.value = _items;
+      isEmpty.value = (Object.values(_items).length === 0);
+      // console.log('__', items.value, isEmpty.value);
     }
 
     onMounted(() => {
@@ -84,6 +89,7 @@ export default {
 
     return {
       isLoading,
+      isEmpty,
       clearStorage,
       human,
       items,
