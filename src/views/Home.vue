@@ -19,11 +19,11 @@
       ></textarea>
     </div>
     <div class="group-optional mt-4 mb-4">
-      <div class="mb-2 input-group text-muted">
+      <div class="mb-2 input-group text-muted noselect">
         <small>OPTIONAL</small>
       </div>
       <div class="mb-3 input-group">
-        <label class="input-group-text" for="inputGroupSelect01">Password</label>
+        <label class="input-group-text noselect" for="inputGroupSelect01">Password</label>
         <input
           type="text"
           class="form-control"
@@ -35,7 +35,7 @@
         />
       </div>
       <div class="mb-3 input-group">
-        <label class="input-group-text" for="inputGroupSelect02">Expires in</label>
+        <label class="input-group-text noselect" for="inputGroupSelect02">Expires in</label>
         <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
           <option :value="5 * 60">5 minutes</option>
           <option :value="10 * 60">10 minutes</option>
@@ -53,7 +53,7 @@
       </div>
       <div class="input-check">
         <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="secretIsBurnable">
-        <label class="form-check-label" for="flexCheckDefault">
+        <label class="form-check-label noselect" for="flexCheckDefault">
           &nbsp; Burn after read
         </label>
       </div>
@@ -215,16 +215,17 @@ export default {
 
 <style lang="scss" scoped>
 .form-container {
+  .noselect {
+    user-select: none;
+  }
+
   .group-optional {
     padding: 5px 0 5px 15px;
     border-left: 2px solid #ccc;
-    // border-right: 2px solid #ccc;
   }
 
   .input-check {
     text-align: left;
-
-    user-select: none;
   }
 
   .form-buttons {
