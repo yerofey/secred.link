@@ -39,7 +39,7 @@
         <div v-else>
           Secret not found!
         </div>
-        <div v-if="isFound" class="mt-4">
+        <div v-if="exists" class="mt-4">
           <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
             <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
           </button>
@@ -256,6 +256,7 @@ export default {
     return {
       canManage,
       manageKey,
+      exists,
       isDecrypted,
       isDeleted,
       isDeletable,
