@@ -22,7 +22,7 @@ pnpm install
 pnpm dev
 ```
 
-## Compiles and minifies for production
+### Compiles and minifies for production
 
 ```bash
 pnpm build
