@@ -13,7 +13,7 @@ if (Object.values(storage.getAllItems(oldPrefix)).length > 0) {
 }
 
 import 'modern-normalize/modern-normalize.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 createApp(App)
   .use(router)

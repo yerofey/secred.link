@@ -11,9 +11,9 @@
           }">
           <div class="card-body">
             <!-- eslint-disable-next-line max-len -->
-            <h6 class="card-title secret-title">
+            <div class="card-title secret-title">
               Secret
-            </h6>
+            </div>
             <p class="card-text secret-info text-muted">
               <div v-if="item.hasPassword">
                 <BIconLockFill/> is protected
@@ -38,7 +38,7 @@
         </small>
       </div>
       <div class="mb-3" v-if="!isEmpty">
-        <button @click="clearStorage" type="button" class="btn btn-sm btn-outline-danger">
+        <button @click="clearStorage" type="button" class="btn btn-sm button">
           <BIconTrash2Fill/> <span class="span-after-icon">Clear device cache</span>
         </button>
       </div>
@@ -118,16 +118,18 @@ export default {
     max-width: 190px;
     min-width: 190px;
     flex-direction: column;
-    background-color: #fff;
-    // box-shadow: 2px 3px 4px rgba(51,51,51,.06);
-    box-shadow: 0 0 24px -8px #0000001a;
+    background-color: var(--app-secondary-bg);
+    box-shadow: 0 0 24px -8px var(--app-secondary-bg);
 
+    color: var(--bs-emphasis-color);
     text-decoration: none;
 
-    &:hover {
-      background-color: #fafaff;
-      border-color: #bcbec7;
-    }
+    // &:hover {
+    //   // background-color: #fafaff;
+    //   // border-color: #bcbec7;
+    //   border-color: var(--bs-tertiary-bg);
+    //   opacity: .9;
+    // }
 
     .secret-title {
       margin-bottom: 0;

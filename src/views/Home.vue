@@ -187,8 +187,8 @@ export default {
           },
           (secretLifetime.value * 1000),
         );
-        // go to editing page
-        router.push({ path: '/new', hash: `#${sid}` });
+        // go to manage page
+        router.push({ path: '/manage', hash: `#${sid}` });
       } else {
         // TODO: error
         log('FAILED_TO_CREATE');
@@ -229,7 +229,7 @@ export default {
   }
 
   .form-buttons {
-    text-align: left;
+    text-align: center;
   }
 
   .submit-button.is-loading {

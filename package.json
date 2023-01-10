@@ -10,6 +10,7 @@
   "dependencies": {
     "@vitejs/plugin-legacy": "^3.0.1",
     "@vitejs/plugin-vue": "^4.0.0",
+    "@vueuse/core": "^9.10.0",
     "@vueuse/head": "^0.7.13",
     "axios": "^0.24.0",
     "bootstrap": "^5.2.3",

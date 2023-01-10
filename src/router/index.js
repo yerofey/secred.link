@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Storage from '../views/Storage.vue';
-import NewSecret from '../views/NewSecret.vue';
+import ManageSecret from '../views/ManageSecret.vue';
 // import DeleteSecret from '../views/_DeleteSecret.vue';
 import ViewSecret from '../views/ViewSecret.vue';
 
@@ -15,14 +15,15 @@ const routes = [
   },
   {
     path: '/new',
-    name: 'new',
-    component: NewSecret,
+    redirect: to => {
+      return { path: '/manage', hash: to.hash }
+    }
   },
-  // {
-  //   path: '/delete',
-  //   name: 'delete',
-  //   component: DeleteSecret,
-  // },
+  {
+    path: '/manage',
+    name: 'manage',
+    component: ManageSecret,
+  },
   {
     path: '/storage',
     name: 'storage',

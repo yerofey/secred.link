@@ -35,7 +35,7 @@
           Secret not found!
         </div>
         <div v-if="exists" class="mt-4">
-          <button @click="deleteItemFromDevice" class="btn btn-sm btn-outline-danger" type="button">
+          <button @click="deleteItemFromDevice" class="btn btn-sm button" type="button">
             <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
           </button>
         </div>
@@ -276,6 +276,11 @@ export default {
 .secret-content {
   position: relative;
 
-  background-color: #fff;
+  background-color: var(--app-secondary-bg);
+
+
+  > samp {
+    color: var(--bs-emphasis-color);
+  }
 }
 </style>

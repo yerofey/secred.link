@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@vitejs/plugin-legacy': ^3.0.1
   '@vitejs/plugin-vue': ^4.0.0
+  '@vueuse/core': ^9.10.0
   '@vueuse/head': ^0.7.13
   axios: ^0.24.0
   bootstrap: ^5.2.3
@@ -29,6 +30,7 @@ specifiers:
 dependencies:
   '@vitejs/plugin-legacy': 3.0.1_terser@5.16.1+vite@4.0.4
   '@vitejs/plugin-vue': 4.0.0_vite@4.0.4+vue@3.2.45
+  '@vueuse/core': 9.10.0_vue@3.2.45
   '@vueuse/head': 0.7.13_vue@3.2.45
   axios: 0.24.0
   bootstrap: 5.2.3_@popperjs+core@2.11.6
@@ -367,6 +369,10 @@ packages:
     resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
     dev: false
 
+  /@types/web-bluetooth/0.0.16:
+    resolution: {integrity: sha512-oh8q2Zc32S6gd/j50GowEjKLoOVOwHP/bWVjKJInBwQqdOYMdPrf1oVlelTlyfFK3CKxL1uahMDAr+vy8T7yMQ==}
+    dev: false
+
   /@vitejs/plugin-legacy/3.0.1_terser@5.16.1+vite@4.0.4:
     resolution: {integrity: sha512-XCtEjxoR3rmy000ujYRBp5kggWqzHz9+F20/yIMUWOzbvu0+KW1e14Fvb8h7SpNn+bfjGW1RiAs1Vrgb7Js+iQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -481,6 +487,18 @@ packages:
     resolution: {integrity: sha512-Ewzq5Yhimg7pSztDV+RH1UDKBzmtqieXQlpTVm2AwraoRL/Rks96mvd8Vgi7Lj+h+TH8dv7mXD3FRZR3TUvbSg==}
     dev: false
 
+  /@vueuse/core/9.10.0_vue@3.2.45:
+    resolution: {integrity: sha512-CxMewME07qeuzuT/AOIQGv0EhhDoojniqU6pC3F8m5VC76L47UT18DcX88kWlP3I7d3qMJ4u/PD8iSRsy3bmNA==}
+    dependencies:
+      '@types/web-bluetooth': 0.0.16
+      '@vueuse/metadata': 9.10.0
+      '@vueuse/shared': 9.10.0_vue@3.2.45
+      vue-demi: 0.13.11_vue@3.2.45
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
+    dev: false
+
   /@vueuse/head/0.7.13_vue@3.2.45:
     resolution: {integrity: sha512-VHSla/0uOAUii/mz+NWLFKMrMbz/lQoYxEcpS/ri7drepYjdB5QdbTnD2KdOX8EmQM/b07qpjKanr7erGrd3XA==}
     peerDependencies:
@@ -490,6 +508,10 @@ packages:
       vue: 3.2.45
     transitivePeerDependencies:
       - '@vue/composition-api'
+    dev: false
+
+  /@vueuse/metadata/9.10.0:
+    resolution: {integrity: sha512-G5VZhgTCapzU9rv0Iq2HBrVOSGzOKb+OE668NxhXNcTjUjwYxULkEhAw70FtRLMZc+hxcFAzDZlKYA0xcwNMuw==}
     dev: false
 
   /@vueuse/shared/9.10.0_vue@3.2.45:

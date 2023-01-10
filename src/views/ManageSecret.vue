@@ -16,7 +16,7 @@
           onmouseup="return false;"
           :value="secretShareLink"
         />
-        <button class="btn copy-button p-0" @click="copyLink">
+        <button class="btn button copy-button p-0" @click="copyLink">
           <BIconClipboardCheck v-if="isCopied"/>
           <BIconClipboard v-else/>
         </button>
@@ -24,15 +24,6 @@
       <div v-else>
         Item not found on this device.
       </div>
-      <!-- <div class="mt-4 mb-2">
-        <router-link
-          :to="{
-            name: 'delete',
-            hash: `#${secretManageKey}`,
-          }"
-          class="btn btn-outline-secondary btn-sm"
-        ><BIconXCircleFill/> <span class="span-after-icon">Delete this secret</span></router-link>
-      </div> -->
     </div>
   </div>
 </template>
@@ -44,7 +35,6 @@ import Storage from '../modules/storage';
 import {
   BIconClipboard,
   BIconClipboardCheck,
-  // BIconXCircleFill,
 } from 'bootstrap-icons-vue';
 import useClipboard from 'vue-clipboard3';
 import { log } from '../modules/utils';
@@ -53,7 +43,6 @@ export default {
   components: {
     BIconClipboard,
     BIconClipboardCheck,
-    // BIconXCircleFill,
   },
   setup() {
     const route = useRoute();
