@@ -4,27 +4,39 @@
 
 ## Project setup
 
+### Prepare config file
+
+```bash
+cp .env.example .env
+```
+
+### Install dependencies
+
 ```bash
 pnpm install
 ```
 
-### Compiles and hot-reloads for development
+### Run dev server
 
 ```bash
-pnpm serve
+pnpm dev
 ```
 
-### Compiles and minifies for production
+## Compiles and minifies for production
 
 ```bash
 pnpm build
 ```
 
+### Preview compiled production build
+
+```bash
+pnpm serve
+```
+
 ## Author
 
 [Yerofey S.](https://github.com/yerofey)
-
-Contact me: [Email](mailto:pm@yerofey.dev)
 
 ## License
 
