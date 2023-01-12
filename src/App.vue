@@ -45,12 +45,14 @@
 </template>
 
 <script>
+import { watch } from 'vue';
 import {
   BIconBookmarkStarFill,
   BIconMoonFill,
   BIconSunFill,
 } from 'bootstrap-icons-vue';
 import { useDark, useColorMode } from '@vueuse/core';
+import { useHead } from '@vueuse/head';
 
 export default {
   components: {
@@ -65,6 +67,12 @@ export default {
       attribute: 'data-bs-theme',
       valueDark: 'dark',
       valueLight: 'light'
+    });
+
+    const getThemeColor = (theme) => (theme == 'light' ? '#f9fafb' : '#212529');
+
+    watch(colorMode, (newVal, oldVal) => {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', getThemeColor(newVal))
     });
 
     return {
