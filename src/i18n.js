@@ -8,8 +8,8 @@ export const allLocales = ['en', 'ru'];
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: 'en',
-  fallbackLocale: 'en',
+  locale: import.meta.env.VITE_I18N_LOCALE,
+  fallbackLocale: import.meta.env.VITE_I18N_FALLBACK_LOCALE,
   messages: messages,
 });
 
