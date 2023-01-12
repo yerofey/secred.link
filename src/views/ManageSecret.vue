@@ -1,15 +1,15 @@
 <template>
   <div>
-    <h4>New Secret Created</h4>
-    <div v-if="isLoading" class="mt-4">Loading info...</div>
+    <h4>{{ $t('manage.created') }}</h4>
+    <div v-if="isLoading" class="mt-4">{{ $t('common.loading') }}...</div>
     <div v-else class="form-container mt-4">
       <div v-if="secretItem !== {}" class="mb-3 copy-input-line">
-        <label class="form-label" for="inputGroupSelect01">Share Link</label>
+        <label class="form-label" for="inputGroupSelect01">{{ $t('manage.share_link') }}</label>
         <input
           type="text"
           class="form-control"
           id="inputGroupSelect01"
-          placeholder="Share link"
+          :placeholder="`${$t('manage.share_link')}`"
           autocomplete="off"
           readonly="true"
           onfocus="this.select();"
@@ -22,7 +22,7 @@
         </button>
       </div>
       <div v-else>
-        Item not found on this device.
+        {{ $t('manage.not_found') }}
       </div>
     </div>
   </div>

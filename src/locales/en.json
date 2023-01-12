@@ -1,0 +1,42 @@
+{
+	"common": {
+		"loading": "Loading",
+		"not_found": "Not found",
+		"secret": "Secret"
+	},
+	"home": {
+		"title": "Secure any data: password, message or link",
+		"subtitle": "Keep sensitive info out of your chats and notes",
+		"form": {
+			"insert": "Insert the content you want to secure",
+			"optional": "Optional",
+			"password": "Password",
+			"passphrase": "Passphrase to access your secret",
+			"expires": "Expires in",
+			"burnable": "Burn after read",
+			"create": "Create Secret",
+			"creating": "Creating"
+		}
+	},
+	"manage": {
+		"created": "New Secret Created",
+		"share_link": "Share Link",
+		"not_found": "Item not found on this device"
+	},
+	"storage": {
+		"title": "Saved Secrets",
+		"protected": "is protected",
+		"not_protected": "is not protected",
+		"empty": "Storage is empty",
+		"on_device": "Secrets are saved on this device",
+		"clean": "Clear device cache"
+	},
+	"view": {
+		"burned": "Burned",
+		"created_at": "created at",
+		"unlock": "Unlock Secret",
+		"passphrase": "Enter passphrase to decrypt secret",
+		"delete": "Delete from device",
+		"deleted": "Secret is successfully deleted"
+	}
+}

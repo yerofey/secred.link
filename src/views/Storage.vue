@@ -1,8 +1,7 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
-    <h4>Saved Secrets</h4>
-    <div v-if="isLoading" class="mt-4">Loading info...</div>
+    <h4>{{ $t('storage.title') }}</h4>
+    <div v-if="isLoading" class="mt-4">{{ $t('common.loading') }}...</div>
     <div v-else class="form-container mt-4">
       <div class="secret-items mb-3" v-if="!isEmpty">
         <router-link v-for="item in items" :key="item.sid" class="card secret-item" :to="{
@@ -10,18 +9,16 @@
             hash: `#${item.keys.accessKey}`,
           }">
           <div class="card-body">
-            <!-- eslint-disable-next-line max-len -->
             <div class="card-title secret-title">
-              Secret
+              {{ $t('common.secret') }}
             </div>
             <p class="card-text secret-info text-muted">
               <div v-if="item.hasPassword">
-                <BIconLockFill/> is protected
+                <BIconLockFill/> {{ $t('storage.protected') }}
               </div>
               <div v-else>
-                <BIconUnlockFill/> is not protected
+                <BIconUnlockFill/> {{ $t('storage.not_protected') }}
               </div>
-              <!-- eslint-disable-next-line vue/no-parsing-error -->
             </p>
             <span class="secret-date">
               {{ human(new Date(item.timestamp)) }}
@@ -30,16 +27,16 @@
         </router-link>
       </div>
       <div v-else>
-        Storage is empty!
+        {{ $t('storage.empty') }}!
       </div>
       <div class="mb-4">
         <small class="text-muted">
-          Secrets are saved on this device.
+          {{ $t('storage.on_device') }}.
         </small>
       </div>
       <div class="mb-3" v-if="!isEmpty">
         <button @click="clearStorage" type="button" class="btn btn-sm button">
-          <BIconTrash2Fill/> <span class="span-after-icon">Clear device cache</span>
+          <BIconTrash2Fill/> <span class="span-after-icon">{{ $t('storage.clean') }}</span>
         </button>
       </div>
     </div>

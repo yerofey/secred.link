@@ -1,47 +1,45 @@
-<!-- eslint-disable max-len -->
 <template>
   <div>
-    <!-- <h4>View Secret</h4> -->
-    <div v-if="isLoading" class="mt-4">Loading secret...</div>
+    <div v-if="isLoading" class="mt-4">{{ $t('common.loading') }}...</div>
     <div v-else class="form-container mt-4 pb-5">
       <div v-if="!isDeleted">
         <div v-if="isFound">
           <div v-if="isDecrypted">
             <div class="secret-content d-block border rounded p-3">
               <span v-if="isBurnable" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                Burned!
+                {{ $t('view.burned') }}!
               </span>
               <samp>
                 {{ secretContent }}
               </samp>
             </div>
             <small class="text-muted mt-2 d-block">
-              created at: {{ secretCreationDate }}
+              {{ $t('view.created_at') }}: {{ secretCreationDate }}
             </small>
           </div>
           <div v-else>
             <form @submit.prevent="submitPassword">
               <div class="py-3">
                 <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-                <input type="text" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" placeholder="Enter passphrase to decrypt secret" v-model="inputPassword" required>
+                <input type="text" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('home.passphrase')}`" v-model="inputPassword" required>
               </div>
               <div class="">
-                <button class="btn btn-primary" type="submit">Unlock secret</button>
+                <button class="btn btn-primary" type="submit">{{ $t('view.unlock') }}</button>
               </div>
             </form>
           </div>
         </div>
         <div v-else>
-          Secret not found!
+          {{ $t('common.not_found') }}!
         </div>
         <div v-if="exists" class="mt-4">
           <button @click="deleteItemFromDevice" class="btn btn-sm button" type="button">
-            <BIconXCircleFill/> <span class="span-after-icon">Delete from device</span>
+            <BIconXCircleFill/> <span class="span-after-icon">{{ $t('view.delete') }}</span>
           </button>
         </div>
       </div>
       <div v-else>
-        Secret is successfully deleted!
+        {{ $t('view.deleted') }}!
       </div>
     </div>
   </div>
@@ -61,10 +59,9 @@ import moment from 'moment';
 import {
   BIconXCircleFill,
 } from 'bootstrap-icons-vue';
-// eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import { Buffer } from 'buffer';
-import { log } from '../modules/utils';
+// import { log } from '../modules/utils';
 
 export default {
   components: {

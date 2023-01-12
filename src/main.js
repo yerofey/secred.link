@@ -1,4 +1,7 @@
 import { createApp } from 'vue';
+import { i18n } from "./i18n.js";
+// import localeEnglish from './locales/en.json';
+// import localeRussian from './i18n/ru.json';
 // import { BootstrapIconsPlugin } from 'bootstrap-icons-vue';
 import VueCryptojs from 'vue-cryptojs';
 import App from './App.vue';
@@ -17,6 +20,7 @@ import 'modern-normalize/modern-normalize.css';
 
 createApp(App)
   .use(router)
+  .use(i18n)
   .use(VueCryptojs)
   // .use(BootstrapIconsPlugin)
   .mount('#app');

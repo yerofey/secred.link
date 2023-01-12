@@ -1,41 +1,37 @@
-<!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable-next-line max-len -->
-<!-- eslint-disable vuejs-accessibility/form-control-has-label vuejs-accessibility/label-has-for -->
-<!-- eslint-disable vue/no-unused-vars -->
 <template>
   <form class="form-container" @submit.prevent="processForm">
     <div class="mb-4">
-      <h5>Secure any data: password, message or link</h5>
-      <h6>Keep sensitive info out of your chats and notes</h6>
+      <h5>{{ $t('home.title') }}</h5>
+      <h6>{{ $t('home.subtitle') }}</h6>
     </div>
     <div>
       <textarea
         class="form-control"
         maxlength="2048"
         rows="4"
-        placeholder="Insert the content you want to secure..."
+        :placeholder="`${$t('home.form.insert')}...`"
         autocorrect="off"
         v-model="secretContent"
       ></textarea>
     </div>
     <div class="group-optional mt-4 mb-4">
       <div class="mb-2 input-group text-muted noselect">
-        <small>OPTIONAL</small>
+        <small>{{ $t('home.form.optional') }}</small>
       </div>
       <div class="mb-3 input-group">
-        <label class="input-group-text noselect" for="inputGroupSelect01">Password</label>
+        <label class="input-group-text noselect" for="inputGroupSelect01">{{ $t('home.form.password') }}</label>
         <input
           type="text"
           class="form-control"
           id="inputGroupSelect01"
-          placeholder="Passphrase to access your secret"
+          :placeholder="`${$t('home.form.insert')}`"
           autocomplete="off"
           maxlength="64"
           v-model="secretPassword"
         />
       </div>
       <div class="mb-3 input-group">
-        <label class="input-group-text noselect" for="inputGroupSelect02">Expires in</label>
+        <label class="input-group-text noselect" for="inputGroupSelect02">{{ $t('home.form.expires') }}</label>
         <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
           <option :value="5 * 60">5 minutes</option>
           <option :value="10 * 60">10 minutes</option>
@@ -54,7 +50,7 @@
       <div class="input-check">
         <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="secretIsBurnable">
         <label class="form-check-label noselect" for="flexCheckDefault">
-          &nbsp; Burn after read
+          &nbsp; {{ $t('home.form.burnable') }}
         </label>
       </div>
     </div>
@@ -68,8 +64,7 @@
         }"
         :disabled="!submitIsEnabled"
       >
-        <!-- eslint-disable-next-line max-len -->
-        <BIconPlusCircleFill />&nbsp;<span class="span-after-icon">{{ submitInProcess ? 'Creating...' : 'Create Secret' }}</span>
+        <BIconPlusCircleFill />&nbsp;<span class="span-after-icon">{{ submitInProcess ? `${$t('home.form.creating')}...` : $t('home.form.create') }}</span>
       </button>
     </div>
   </form>
@@ -112,7 +107,6 @@ export default {
     const hashString = (string) => CryptoJS.SHA256(string).toString();
     const base64ToHex = (str) => Buffer.from(str, 'base64').toString('hex');
 
-    // eslint-disable-next-line no-promise-executor-return
     const processForm = async () => {
       // add loading status
       submitInProcess.value = true;
@@ -139,7 +133,6 @@ export default {
           contentEncryptionString,
         ).toString(),
       );
-      // eslint-disable-next-line max-len
       const encryptedSecretContentBase64 = CryptoJS.AES.encrypt(
         clientSecretContent,
         contentEncryptionString,
@@ -195,7 +188,6 @@ export default {
       }
     };
 
-    // eslint-disable-next-line no-unused-vars
     watch(secretContent, (newVal, oldVal) => {
       submitIsEnabled.value = newVal.length > 0;
     });
