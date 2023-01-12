@@ -144,7 +144,7 @@ header {
         > .app-title {
           margin-left: 7px;
 
-          color: var(--bs-body-color);
+          color: var(--bs-emphasis-color);
           font-size: 22px;
           font-weight: 700;
         }
