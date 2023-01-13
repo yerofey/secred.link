@@ -21,7 +21,7 @@
             <form @submit.prevent="submitPassword">
               <div class="py-3">
                 <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-                <input type="text" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('home.passphrase')}`" v-model="inputPassword" required>
+                <input type="password" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('home.form.passphrase')}`" v-model="inputPassword" required>
               </div>
               <div class="">
                 <button class="btn btn-primary" type="submit">{{ $t('view.unlock') }}</button>
