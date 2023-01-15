@@ -12,6 +12,7 @@
         :placeholder="`${$t('home.form.insert')}...`"
         autocorrect="off"
         v-model="secretContent"
+        v-focus
       ></textarea>
     </div>
     <div class="group-optional mt-4 mb-4">
