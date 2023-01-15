@@ -25,7 +25,7 @@
           type="text"
           class="form-control"
           id="inputGroupSelect01"
-          :placeholder="`${$t('home.form.insert')}`"
+          :placeholder="`${$t('home.form.passphrase')}`"
           autocomplete="off"
           maxlength="64"
           v-model="secretPassword"
