@@ -18,9 +18,18 @@ if (Object.values(storage.getAllItems(oldPrefix)).length > 0) {
 import 'modern-normalize/modern-normalize.css';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-createApp(App)
-  .use(router)
-  .use(i18n)
-  .use(VueCryptojs)
-  // .use(BootstrapIconsPlugin)
-  .mount('#app');
+const app = createApp(App);
+
+app.use(router);
+app.use(i18n);
+app.use(VueCryptojs);
+// app.use(BootstrapIconsPlugin)
+
+// attr v-focus
+app.directive('focus', {
+  mounted(el) {
+    el.focus();
+  }
+});
+
+app.mount('#app');
