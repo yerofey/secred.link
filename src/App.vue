@@ -212,8 +212,8 @@ main {
   .form-container {
     margin: 0 auto;
 
-    width: 480px;
-    @media screen and (max-width: 480px) {
+    width: 490px;
+    @media screen and (max-width: 490px) {
       width: 100%;
     }
     padding: 0 10px;
