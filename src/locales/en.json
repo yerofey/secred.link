@@ -34,8 +34,8 @@
 	"view": {
 		"burned": "Burned",
 		"created_at": "created at",
-		"unlock": "Unlock Secret",
-		"passphrase": "Enter passphrase to decrypt secret",
+		"unlock": "Unlock",
+		"passphrase": "Enter passphrase to decrypt",
 		"delete": "Delete from device",
 		"deleted": "Secret is successfully deleted"
 	}

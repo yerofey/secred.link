@@ -18,15 +18,18 @@
             </small>
           </div>
           <div v-else>
-            <form @submit.prevent="submitPassword">
-              <div class="py-3">
-                <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
-                <input type="password" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('home.form.passphrase')}`" v-model="inputPassword" required>
-              </div>
-              <div class="">
-                <button class="btn btn-primary" type="submit">{{ $t('view.unlock') }}</button>
-              </div>
-            </form>
+            <div class="secret-content d-block border rounded p-3">
+              <form @submit.prevent="submitPassword">
+                <div class="btn-toolbar">
+                  <div class="input-group w-100">
+                    <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
+                    <div class="input-group-text" id="btnGroupAddon">{{ $t('home.form.password') }}</div>
+                    <input type="password" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('view.passphrase')}`" v-model="inputPassword" autocomplete="off" v-focus>
+                    <button class="btn btn-primary" type="submit">{{ $t('view.unlock') }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
         <div v-else>
