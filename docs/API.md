@@ -11,7 +11,7 @@ Path: `/secret/create`
 
 Method: `POST`
 
-Data:
+Data (FormData):
 
 ```js
  accessKey: varchar(64),
