@@ -150,16 +150,18 @@ export default {
         manageKey: manageKeyHash2, // 2x hashed
         contentHash: encryptedSecretContent,
         testHash,
-        isProtected: secretIsProtectedWithPassword,
-        isBurnable: secretIsBurnable.value,
-        lifetime: secretLifetime.value,
-        v: import.meta.env.VITE_VERSION_PREFIX,
+        isProtected: Boolean(secretIsProtectedWithPassword),
+        isBurnable: Boolean(secretIsBurnable.value),
+        lifetime: parseInt(secretLifetime.value),
+        v: parseInt(import.meta.env.VITE_VERSION_PREFIX),
       };
-      log(`secret: ${secretData}`);
+      log(`saving secret...`);
+
       const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
-      const res = await axios.post(createSecretUrl, querystring.stringify(secretData));
+      const res = await axios.post(createSecretUrl, secretData);
       if (res.status === 200 && res.data.data.success === true) {
-        log(`SECRED_SAVED ${JSON.stringify(res.data.data)}`);
+        log(`secret saved`);
+
         // save into storage
         storage.setItem(
           `secret_${sid}`,
@@ -180,11 +182,12 @@ export default {
           },
           (secretLifetime.value * 1000),
         );
+
         // go to manage page
         router.push({ path: '/manage', hash: `#${sid}` });
       } else {
         // TODO: error
-        log('FAILED_TO_CREATE');
+        log('FAILED');
       }
     };
 
