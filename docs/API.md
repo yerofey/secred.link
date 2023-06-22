@@ -5,33 +5,33 @@ You just need these methods.
 
 ## Create secret
 
-### Request
+### Request Example
 
 Path: `/secret/create`
 
 Method: `POST`
 
-Data (FormData):
-
 ```js
- accessKey: varchar(64),
- manageKey: varchar(64),
- contentHash: text,
- testHash: varchar(64), // used to validate decoding
- isProtected: boolean,
- isBurnable: boolean,
- lifetime: int, // seconds from now
- v: int, // 0 for beta version
+{
+ "accessKey": "41c80e9ed6d1a3a41128a99a3c02749f0cbb9dc80902bac0a7aeb08b66591248", // string: 64 symbols
+ "manageKey": "9b2959b7d3b2e684dde08960b1192a565f5823bde4bb1946f0043c2855bf83de", // string: 64 symbols
+ "contentHash": "53616c7465645f5f548a620e4dda0eb3fc25b42519f1b4cd3d7b5f8cf373e9e7",
+ "testHash": "53616c7465645f5f4443560ed15a0b34a384d7eb387e8ae71e9d92001e86891c", // string: 64 symbols
+ "isProtected": false, // boolean
+ "isBurnable": false, // boolean
+ "lifetime": 2592000, // int
+ "v": 0, // int
+}
 ```
 
-### Response
+### Response Example
 
 ```js
 {
-    "code": 200,
-    "data": {
-        "success": true
-    }
+ "code": 200,
+ "data": {
+  "success": true
+ }
 }
 ```
 
@@ -47,16 +47,15 @@ Method: `GET`
 
 ```js
 {
-    "code": 200,
-    "data": {
-        "uuid": "40a7fc90-29f4-41fd-9836-2deafb72f566",
-        "content": "53616c7465645f5f0a8c9dd4571f411b3fe8002ca375676475b39987b3b90cfb",
-        "test": "53616c7465645f5feb63c8f1f7446d389e4b566cce12cc21082e610945336a36",
-        "isProtected": false,
-        "isBurnable": false,
-        "expiration_date": "2023-02-11T19:35:09.000000Z",
-        "creation_date": "2023-01-12T19:35:09.000000Z",
-        "v": 0
-    }
+ "code": 200,
+ "data": {
+  "content": "53616c7465645f5f0a8c9dd4571f411b3fe8002ca375676475b39987b3b90cfb",
+  "test": "53616c7465645f5feb63c8f1f7446d389e4b566cce12cc21082e610945336a36",
+  "isProtected": false,
+  "isBurnable": false,
+  "expiration_date": "2023-02-11T19:35:09.000000Z",
+  "creation_date": "2023-01-12T19:35:09.000000Z",
+  "v": 0
+ }
 }
 ```
