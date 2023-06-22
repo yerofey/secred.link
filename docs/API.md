@@ -21,7 +21,7 @@ Data (FormData):
  isProtected: boolean,
  isBurnable: boolean,
  lifetime: int, // seconds from now
- v: '0.2',
+ v: int, // 0 for beta version
 ```
 
 ### Response
@@ -30,7 +30,6 @@ Data (FormData):
 {
     "code": 200,
     "data": {
-        "uuid": "ba7fe174-024f-44e7-845c-65c87e489a6e",
         "success": true
     }
 }
