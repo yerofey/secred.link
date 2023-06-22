@@ -5,7 +5,7 @@ You just need these methods.
 
 ## Create secret
 
-### Request Example
+### Frontend POST Request
 
 Path: `/secret/create`
 
@@ -24,7 +24,7 @@ Method: `POST`
 }
 ```
 
-### Response Example
+### Backend Creation Response Body
 
 ```js
 {
@@ -37,13 +37,13 @@ Method: `POST`
 
 ## Get secret
 
-### Request
+### Frontend GET Request
 
 Path: `/secret/get/{accessKey}`
 
 Method: `GET`
 
-### Response
+### Backend Data Response Body
 
 ```js
 {
