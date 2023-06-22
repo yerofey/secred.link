@@ -1,6 +1,9 @@
 import { createI18n } from 'vue-i18n';
 import messages from '@intlify/unplugin-vue-i18n/messages';
 
+const defaultLocale = import.meta.env.VITE_I18N_LOCALE;
+const userLocale = getUserLocale();
+
 // List of all locales.
 export const allLocales = ['en', 'ru'];
 
@@ -8,7 +11,7 @@ export const allLocales = ['en', 'ru'];
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: import.meta.env.VITE_I18N_LOCALE,
+  locale: (allLocales.includes(userLocale) ? userLocale : defaultLocale),
   fallbackLocale: import.meta.env.VITE_I18N_FALLBACK_LOCALE,
   messages: messages,
 });
@@ -33,15 +36,19 @@ export async function setLocale(locale) {
 }
 
 // Fetch locale.
-function loadLocale(locale) {
-  return fetch(`./locales/${locale}.json`)
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
+async function loadLocale(locale) {
+  try {
+    const response = await fetch(`./locales/${locale}.json`);
+    if (response.ok) {
+      return await response.json();
+    } else {
       throw new Error('Something went wrong!');
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function getUserLocale() {
+  return navigator.language || navigator.userLanguage;
 }
