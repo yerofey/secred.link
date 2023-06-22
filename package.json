@@ -24,7 +24,6 @@
     "modern-normalize": "^1.1.0",
     "moment": "^2.29.4",
     "nanoid": "^3.3.4",
-    "querystring": "^0.2.1",
     "register-service-worker": "^1.7.2",
     "vite": "^4.0.4",
     "vue": "^3.2.45",
