@@ -28,7 +28,6 @@ Method: `POST`
 
 ```js
 {
- "code": 200,
  "data": {
   "success": true
  }
@@ -47,7 +46,6 @@ Method: `GET`
 
 ```js
 {
- "code": 200,
  "data": {
   "content": "53616c7465645f5f0a8c9dd4571f411b3fe8002ca375676475b39987b3b90cfb",
   "test": "53616c7465645f5feb63c8f1f7446d389e4b566cce12cc21082e610945336a36",
