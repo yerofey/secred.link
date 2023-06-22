@@ -33,18 +33,18 @@
       <div class="mb-3 input-group">
         <label class="input-group-text noselect" for="inputGroupSelect02">{{ $t('home.form.expires') }}</label>
         <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
-          <option :value="5 * 60">5 minutes</option>
-          <option :value="10 * 60">10 minutes</option>
-          <option :value="30 * 60">30 minutes</option>
-          <option :value="60 * 60">60 minutes</option>
-          <option :value="3 * 60 * 60">3 hours</option>
-          <option :value="6 * 60 * 60">6 hours</option>
-          <option :value="12 * 60 * 60">12 hours</option>
-          <option :value="24 * 60 * 60">24 hours</option>
-          <option :value="3 * 24 * 60 * 60">3 days</option>
-          <option :value="7 * 24 * 60 * 60">7 days</option>
-          <option :value="14 * 24 * 60 * 60">14 days</option>
-          <option :value="30 * 24 * 60 * 60" selected>30 days</option>
+          <option :value="5 * 60">5 {{ $t('common.minutes_5') }}</option>
+          <option :value="10 * 60">10 {{ $t('common.minutes_5') }}</option>
+          <option :value="30 * 60">30 {{ $t('common.minutes_5') }}</option>
+          <option :value="60 * 60">1 {{ $t('common.hours_1') }}</option>
+          <option :value="3 * 60 * 60">3 {{ $t('common.hours_2') }}</option>
+          <option :value="6 * 60 * 60">6 {{ $t('common.hours_5') }}</option>
+          <option :value="12 * 60 * 60">12 {{ $t('common.hours_5') }}</option>
+          <option :value="24 * 60 * 60">24 {{ $t('common.hours_2') }}</option>
+          <option :value="3 * 24 * 60 * 60">3 {{ $t('common.days_2') }}</option>
+          <option :value="7 * 24 * 60 * 60">1 {{ $t('common.weeks_1') }}</option>
+          <option :value="14 * 24 * 60 * 60">2 {{ $t('common.weeks_2') }}</option>
+          <option :value="30 * 24 * 60 * 60" selected>1 {{ $t('common.months_1') }}</option>
         </select>
       </div>
       <div class="input-check">
@@ -81,7 +81,6 @@ import { useRouter } from 'vue-router';
 import { customAlphabet } from 'nanoid';
 import { BIconPlusCircleFill } from 'bootstrap-icons-vue';
 import axios from 'axios';
-import querystring from 'querystring';
 import Storage from '../modules/storage';
 import { Buffer } from 'buffer';
 import { log } from './../modules/utils';
