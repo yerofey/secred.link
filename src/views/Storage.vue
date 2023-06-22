@@ -104,16 +104,16 @@ export default {
 <style lang="scss" scoped>
 .secret-items {
   display: flex;
-  // padding: 20px 0;
   flex-flow: row wrap;
   align-content: flex-start;
   justify-content: center;
 
+
   .secret-item {
     margin: 7px;
     display: flex;
-    max-width: 190px;
-    min-width: 190px;
+    max-width: 170px;
+    min-width: 170px;
     flex-direction: column;
     background-color: var(--app-secondary-bg);
     box-shadow: 0 0 24px -8px var(--app-secondary-bg);
@@ -121,12 +121,6 @@ export default {
     color: var(--bs-emphasis-color);
     text-decoration: none;
 
-    // &:hover {
-    //   // background-color: #fafaff;
-    //   // border-color: #bcbec7;
-    //   border-color: var(--bs-tertiary-bg);
-    //   opacity: .9;
-    // }
 
     .secret-title {
       margin-bottom: 0;
