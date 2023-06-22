@@ -281,6 +281,7 @@ export default {
 
   > samp {
     color: var(--bs-emphasis-color);
+    overflow-wrap: break-word;
   }
 }
 </style>
