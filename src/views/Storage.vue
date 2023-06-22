@@ -10,6 +10,7 @@
           }">
           <div class="card-body">
             <div class="card-title secret-title">
+              <!-- {{ `${(item.isOwner ? 'Your' : 'Added')} ` }} -->
               {{ $t('common.secret') }}
             </div>
             <p class="card-text secret-info text-muted">
@@ -83,6 +84,7 @@ export default {
       }
       // fill values
       items.value = sortedItems;
+      // console.log('items', sortedItems);
       isEmpty.value = (Object.values(_items).length === 0);
     }
 
@@ -127,6 +129,7 @@ export default {
     }
 
     .secret-info {
+      margin-top: 3px;
       margin-bottom: 0;
 
       font-size: 14px;
