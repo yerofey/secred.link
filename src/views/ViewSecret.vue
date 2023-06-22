@@ -146,7 +146,6 @@ export default {
                   accessKey,
                 },
                 isOwner: false,
-                isEncoded: false,
                 hasPassword: isProtected.value,
                 timestamp: Math.floor(Date.now()),
                 v: secretV,

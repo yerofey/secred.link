@@ -173,7 +173,6 @@ export default {
               decodeKey: contentEncryptionString,
             },
             isOwner: true,
-            isEncoded: false,
             hasPassword: secretIsProtectedWithPassword,
             isBurnable: secretIsBurnable.value,
             timestamp: Math.floor(Date.now()),
