@@ -2,7 +2,20 @@
 	"common": {
 		"loading": "Loading",
 		"not_found": "Not found",
-		"secret": "Secret"
+		"secret": "Secret",
+		"days_1": "day",
+		"days_2": "days",
+		"days_5": "days",
+		"hours_1": "hour",
+		"hours_2": "hours",
+		"hours_5": "hours",
+		"minutes_1": "minute",
+		"minutes_2": "minutes",
+		"minutes_5": "minutes",
+		"months_1": "month",
+		"weeks_1": "week",
+		"weeks_2": "weeks",
+		"weeks_5": "weeks"
 	},
 	"home": {
 		"title": "Secure any data: password, message or link",
