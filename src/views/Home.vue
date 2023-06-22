@@ -116,7 +116,6 @@ export default {
       const clientSecretPassword = secretPassword.value;
       const prefix = `${import.meta.env.VITE_VERSION_PREFIX}`;
       const clientSecretPasswordHash = hashString(clientSecretPassword);
-      // const passHash = hashString(clientSecretPasswordHash);
       const accessKey = prefix + nanoid();
       const accessKeyHash1 = hashString(accessKey);
       const accessKeyHash2 = hashString(accessKeyHash1);
@@ -139,7 +138,6 @@ export default {
       const encryptedSecretContent = base64ToHex(encryptedSecretContentBase64);
       const contentHexHash = hashString(encryptedSecretContent);
       const secretIsProtectedWithPassword = (secretPassword.value.length > 0);
-      // const defaultLifetime = 3 * 24 * (60 * 60 * 1000); // 3 days
       const sid = hashString(accessKeyHash2).slice(0, 20);
       const dataHash = hashString(`${accessKeyHash2}${manageKeyHash2}${contentHexHash}${secretIsProtectedWithPassword}${secretLifetime.value}${secretIsBurnable.value}`); // hash to check if secret was changed
 
@@ -170,7 +168,6 @@ export default {
             keys: {
               accessKey,
               manageKey,
-              decodeKey: contentEncryptionString,
             },
             isOwner: true,
             hasPassword: secretIsProtectedWithPassword,

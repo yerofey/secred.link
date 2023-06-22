@@ -178,11 +178,6 @@ export default {
           manageKey.value = item.keys.manageKey;
         }
 
-        //     // if (item.keys.decodeKey !== undefined) {
-        //     //   log('IS_OWNER');
-        //     //   isOwner.value = true;
-        //     // }
-
         exists.value = true;
         localItem.value = item;
       } else {
@@ -199,7 +194,6 @@ export default {
     const decryptSecret = () => {
       const item = secretItem.value;
       const clientSecretPasswordHash = hashString(inputPassword.value);
-      // (isOwner.value ? localItem.value.decodeKey :
       const contentEncryptionString = hashString(`${prefix}${hashString(`${clientSecretPasswordHash}${accessKeyHash1}`)}`);
       const contentBase64 = hexToBase64(item.content);
       const testBase64 = hexToBase64(item.test);
