@@ -156,7 +156,7 @@ export default {
 
       const createSecretUrl = `${import.meta.env.VITE_API_URL}/secret/create`;
       const res = await axios.post(createSecretUrl, secretData);
-      if (res.status === 200 && res.data.data.success === true) {
+      if (res.status === 201 && res.data.data.success === true) {
         log(`secret saved`);
 
         // save into storage
