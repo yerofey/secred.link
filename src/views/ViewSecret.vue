@@ -113,22 +113,16 @@ export default {
       }
 
       const apiUrl = `${import.meta.env.VITE_API_URL}/secret/get/${accessKeyHash2}`;
-      // if (canManage.value === true) {
-      //   const manageKeyHash1 = hashString(manageKey.value);
-      //   const manageKeyHash2 = hashString(manageKeyHash1);
-      //   apiUrl += `/${manageKeyHash2}`;
-      // }
 
       try {
         const res = await axios.get(apiUrl);
-        // log(`API_RES: ${JSON.stringify(res.data)}`);
 
         if (res.status === 200 && res.data) {
           const item = res.data.data;
           secretItem.value = item;
           secretCreationDate.value = moment(item.creation_date).format('YYYY-MM-DD HH:mm:ss');
           isBurnable.value = item.isBurnable;
-          isDeletable.value = false; // item.is_deletable;
+          isDeletable.value = false;
           isProtected.value = item.isProtected;
           isFound.value = true;
           isReady.value = true;
