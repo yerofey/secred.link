@@ -7,9 +7,9 @@ You just need these methods.
 
 ### Frontend POST Request
 
-Path: `/secret/create`
+**Path**: `/secret/create`
 
-Method: `POST`
+**Method**: `POST`
 
 ```js
 {
@@ -24,7 +24,11 @@ Method: `POST`
 }
 ```
 
-### Backend Creation Response Body
+### Backend Creation Response
+
+**Code**: `201`
+
+**Data**:
 
 ```js
 {
@@ -38,11 +42,15 @@ Method: `POST`
 
 ### Frontend GET Request
 
-Path: `/secret/get/{accessKey}`
+**Path**: `/secret/get/{accessKey}`
 
-Method: `GET`
+**Method**: `GET`
 
-### Backend Data Response Body
+### Backend Data Response
+
+**Code**: `200`
+
+**Data**:
 
 ```js
 {
