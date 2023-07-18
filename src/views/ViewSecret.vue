@@ -9,9 +9,7 @@
               <span v-if="isBurnable" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ $t('view.burned') }}!
               </span>
-              <samp>
-                {{ secretContent }}
-              </samp>
+              <samp v-html="secretContentHTML"></samp>
             </div>
             <small class="text-muted mt-2 d-block">
               {{ $t('view.created_at') }}: {{ secretCreationDate }}
@@ -50,6 +48,7 @@
 
 <script>
 import {
+  computed,
   ref,
   inject,
   onMounted,
@@ -100,6 +99,7 @@ export default {
     const secretItem = ref({});
     const secretCreationDate = ref('');
     const secretContent = ref('');
+    const secretContentHTML = computed(() => secretContent.value.replace(/\n/g, "<br>"));
     const inputPassword = ref('');
     const inputPasswordIsCorrect = ref(false);
     const inputPasswordShowStatus = ref(false);
@@ -248,6 +248,7 @@ export default {
       isProtected,
       secretCreationDate,
       secretContent,
+      secretContentHTML,
       inputPassword,
       inputPasswordIsCorrect,
       inputPasswordShowStatus,
