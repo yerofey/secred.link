@@ -1,4 +1,4 @@
-# secred.app
+# secred.link
 
 > Secure any data: password, message or link
 
@@ -56,4 +56,4 @@ pnpm serve
 
 ## License
 
-[MIT](https://github.com/yerofey/secred.app/blob/master/LICENSE)
+[MIT](https://github.com/yerofey/secred.link/blob/master/LICENSE)
