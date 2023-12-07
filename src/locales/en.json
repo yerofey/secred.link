@@ -50,6 +50,7 @@
 		"unlock": "Unlock",
 		"passphrase": "Enter passphrase to decrypt",
 		"delete": "Delete from device",
-		"deleted": "Secret is successfully deleted"
+		"deleted": "Secret is successfully deleted",
+		"burn": "Delete from the cloud"
 	}
 }

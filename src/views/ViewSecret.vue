@@ -37,6 +37,9 @@
           <button @click="deleteItemFromDevice" class="btn btn-sm button" type="button">
             <BIconXCircleFill/> <span class="span-after-icon">{{ $t('view.delete') }}</span>
           </button>
+          <button v-if="canManage && isFound" @click="deleteItemFromCloud" class="btn btn-sm button delete-button" type="button">
+            <BIconTrash2Fill/> <span class="span-after-icon">{{ $t('view.burn') }}</span>
+          </button>
         </div>
       </div>
       <div v-else>
@@ -60,14 +63,16 @@ import human from 'human-time';
 import moment from 'moment';
 import {
   BIconXCircleFill,
+  BIconTrash2Fill,
 } from 'bootstrap-icons-vue';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-// import { log } from '../modules/utils';
+import { log } from '../modules/utils';
 
 export default {
   components: {
     BIconXCircleFill,
+    BIconTrash2Fill,
   },
   setup() {
     const CryptoJS = inject('cryptojs');
@@ -154,6 +159,8 @@ export default {
         } else {
           // log('API_SECRET_NOT_FOUND');
           isFound.value = false;
+
+          deleteItemFromDevice();
         }
       } catch (err) {
         isFound.value = false;
@@ -182,6 +189,18 @@ export default {
     const deleteItemFromDevice = () => {
       storage.removeItem(`secret_${sid}`);
       isDeleted.value = true;
+    }
+
+    const deleteItemFromCloud = async () => {
+      const manageKeyHash2 = hashString(hashString(manageKey.value));
+      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/secret/delete/${accessKeyHash2}/${manageKeyHash2}`);
+      if (res.status === 200 && res.data.data.success === true) {
+        log('DELETED');
+
+        deleteItemFromDevice();
+      } else {
+        log('FAILED');
+      }
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -253,6 +272,7 @@ export default {
       inputPasswordIsCorrect,
       inputPasswordShowStatus,
       deleteItemFromDevice,
+      deleteItemFromCloud,
       submitPassword,
       human,
     };
@@ -271,5 +291,9 @@ export default {
     color: var(--bs-emphasis-color);
     overflow-wrap: break-word;
   }
+}
+
+.delete-button {
+  margin-left: 0.5rem;
 }
 </style>
