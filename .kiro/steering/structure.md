@@ -31,11 +31,6 @@
 - `locales/en.json` - English translations
 - `locales/ru.json` - Russian translations
 
-## Utility Scripts (`_/`)
-- `encryption.js` - Server-side encryption utilities
-- `dev.js` - Development helpers
-- `hex.js` - Hex conversion utilities
-
 ## Static Assets (`public/`)
 - `favicon.ico` - Main favicon
 - `img/icons/` - App icons and favicons
