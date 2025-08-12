@@ -22,7 +22,7 @@
 		"subtitle": "Keep sensitive info out of your chats and notes",
 		"form": {
 			"insert": "Insert the content you want to secure",
-			"optional": "Optional",
+			"optional": "Optional settings",
 			"password": "Password",
 			"passphrase": "Passphrase to access your secret",
 			"expires": "Expires in",

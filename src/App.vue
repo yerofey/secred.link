@@ -1,7 +1,7 @@
 <!-- eslint-disable max-len -->
 <template>
-  <div class="layout">
-    <header class="app-header p-3 border-bottom">
+  <div class="layout d-flex flex-column min-vh-100">
+    <header class="app-header flex p-3 border-bottom">
       <div class="container-sm">
         <div class="app-nav d-flex flex-wrap">
           <div class="app-main d-flex align-items-center justify-center">
@@ -18,7 +18,6 @@
                 draggable="false"
               />
               <span class="app-title">Secred</span>
-              <span class="app-subtitle">β</span>
             </router-link>
             <button @click="colorMode = (colorMode === 'dark' ? 'light' : 'dark')" class="btn btn-sm button d-inline-block app-theme-button">
               <BIconMoonFill v-if="colorMode === 'light'"/>
@@ -36,11 +35,14 @@
         </div>
       </div>
     </header>
-    <main class="app-content">
+    <main class="app-content d-flex flex-column flex-grow-1">
       <div class="container">
         <router-view />
       </div>
     </main>
+    <footer class="d-flex text-center p-4 w-100 justify-content-center mt-auto">
+      <p><a href="https://github.com/yerofey/secred.link" target="_blank">GitHub</a></p>
+    </footer>
   </div>
 </template>
 
@@ -87,11 +89,11 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../node_modules/bootstrap/scss/bootstrap";
-
 html,
+body,
 #app {
   height: 100%;
+  margin: 0;
 }
 
 html {
@@ -114,10 +116,7 @@ html {
 
 body {
   position: relative;
-
-  height: auto;
-  min-height: 100vh;
-
+  height: 100%;
   background-color: var(--app-primary-bg);
 }
 
@@ -126,10 +125,24 @@ body {
   font-family: 'Poppins', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
 }
 
 footer {
   font-size: 14px;
+  width: 100%;
+  flex-shrink: 0;
+  margin-top: auto;
+  
+  a {
+    color: var(--bs-secondary-color);
+    text-decoration: none;
+    
+    &:hover {
+      color: var(--bs-emphasis-color);
+      text-decoration: underline;
+    }
+  }
 }
 
 header {
@@ -177,14 +190,6 @@ header {
       }
     }
 
-    // > .app-main > .btn,
-    // > .app-buttons > .btn {
-    //   background-color: var(--bs-tertiary-bg);
-    //   border: 1px solid var(--bs-border-color);
-
-    //   color: var(--app-icon-color);
-    // }
-
     > .app-buttons {
       display: flex;
     }
@@ -204,7 +209,7 @@ header {
 
 main {
   padding: 40px 0;
-  min-height: 100%;
+  /* Bootstrap flex-grow-1 already handles this */
 
   text-align: center;
 
@@ -246,14 +251,4 @@ main {
   margin-left: 5px;
   vertical-align: middle;
 }
-
-// svg {
-//   color: var(--app-svg-fill-color) !important;
-
-
-//   > path {
-//     color: var(--app-svg-fill-color) !important;
-//     fill: var(--app-svg-fill-color) !important;
-//   }
-// }
 </style>
