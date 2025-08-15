@@ -6,7 +6,8 @@
         <div v-if="isFound">
           <div v-if="isDecrypted">
             <div class="secret-content d-block border rounded p-3">
-              <span v-if="isBurnable" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <span v-if="isBurnable"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ $t('view.burned') }}!
               </span>
               <samp v-html="secretContentHTML"></samp>
@@ -22,7 +23,9 @@
                   <div class="input-group w-100">
                     <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
                     <div class="input-group-text" id="btnGroupAddon">{{ $t('home.form.password') }}</div>
-                    <input type="password" class="form-control" :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }" :placeholder="`${$t('view.passphrase')}`" v-model="inputPassword" autocomplete="off" v-focus>
+                    <input type="password" class="form-control"
+                      :class="{ 'is-valid': (inputPassword.length > 0 && inputPasswordShowStatus && inputPasswordIsCorrect), 'is-invalid': (inputPassword.length > 0 && inputPasswordShowStatus && !inputPasswordIsCorrect) }"
+                      :placeholder="`${$t('view.passphrase')}`" v-model="inputPassword" autocomplete="off" v-focus>
                     <button class="btn btn-primary" type="submit">{{ $t('view.unlock') }}</button>
                   </div>
                 </div>
@@ -35,10 +38,11 @@
         </div>
         <div v-if="exists" class="mt-4">
           <button @click="deleteItemFromDevice" class="btn btn-sm button" type="button">
-            <BIconXCircleFill/> <span class="span-after-icon">{{ $t('view.delete') }}</span>
+            <BIconXCircleFill /> <span class="span-after-icon">{{ $t('view.delete') }}</span>
           </button>
-          <button v-if="canManage && isFound" @click="deleteItemFromCloud" class="btn btn-sm button delete-button" type="button">
-            <BIconTrash2Fill/> <span class="span-after-icon">{{ $t('view.burn') }}</span>
+          <button v-if="canManage && isFound" @click="deleteItemFromCloud" class="btn btn-sm button delete-button"
+            type="button">
+            <BIconTrash2Fill /> <span class="span-after-icon">{{ $t('view.burn') }}</span>
           </button>
         </div>
       </div>
@@ -193,7 +197,9 @@ export default {
 
     const deleteItemFromCloud = async () => {
       const manageKeyHash2 = hashString(hashString(manageKey.value));
-      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/secret/delete/${accessKeyHash2}/${manageKeyHash2}`);
+      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/secret/delete/${accessKeyHash2}/${manageKeyHash2}`, {
+        data: { confirm: true }
+      });
       if (res.status === 200 && res.data.data.success === true) {
         log('DELETED');
 
@@ -287,7 +293,7 @@ export default {
   background-color: var(--app-secondary-bg);
 
 
-  > samp {
+  >samp {
     color: var(--bs-emphasis-color);
     overflow-wrap: break-word;
   }
