@@ -77,7 +77,7 @@ The API is available at [api.secred.link](https://github.com/yerofey/api.secred.
 ### Prerequisites
 
 - Node.js
-- NPM or PNPM package manager
+- NPM (or other package manager)
 
 ### Installation
 
@@ -96,40 +96,25 @@ cp .env.example .env
 ```bash
 # using NPM
 npm install
-
-# using PNPM
-pnpm install
 ```
 
 ### Development
 
 Run the development server:
 ```bash
-# using NPM
 npm run dev
-
-# using PNPM
-pnpm dev
 ```
 
 ### Production Build
 
 Build for production:
 ```bash
-# using NPM
 npm run build
-
-# using PNPM
-pnpm build
 ```
 
 Preview production build:
 ```bash
-# using NPM
 npm run serve
-
-# using PNPM
-pnpm serve
 ```
 
 ## Contributing
