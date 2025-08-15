@@ -3,6 +3,7 @@
 		"loading": "Loading",
 		"not_found": "Not found",
 		"secret": "Secret",
+		"error": "Error",
 		"days_1": "day",
 		"days_2": "days",
 		"days_5": "days",
@@ -20,6 +21,9 @@
 	"home": {
 		"title": "Secure any data: password, message or link",
 		"subtitle": "Keep sensitive info out of your chats and notes",
+		"api": {
+			"unavailable": "API service is currently unavailable. Please try again later."
+		},
 		"form": {
 			"insert": "Insert the content you want to secure",
 			"optional": "Optional settings",

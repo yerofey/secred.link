@@ -1,5 +1,8 @@
 <template>
   <form class="form-container" @submit.prevent="processForm">
+    <div v-if="apiStatus === 'error'" class="alert alert-danger mb-4" role="alert">
+      <strong>{{ $t('common.error') }}:</strong> {{ apiStatusMessage || $t('home.api.unavailable') }}
+    </div>
     <div class="mb-4">
       <h5>{{ $t('home.title') }}</h5>
       <h6>{{ $t('home.subtitle') }}</h6>
@@ -55,7 +58,7 @@
     <div class="mt-4 form-buttons">
       <button @click="processForm" type="button" class="btn btn-primary btn-lg submit-button" :class="{
         'is-loading': submitInProcess,
-      }" :disabled="!submitIsEnabled">
+      }" :disabled="!submitIsEnabled || apiStatus === 'error'">
         <BIconPlusCircleFill />&nbsp;<span class="span-after-icon">{{ submitInProcess ? `${$t('home.form.creating')}...`
           : $t('home.form.create') }}</span>
       </button>
@@ -64,9 +67,10 @@
 </template>
 
 <script>
-import { inject, ref } from 'vue';
+import { inject, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSecretForm } from '../modules/secretFormProcessor';
+import { useApiHealth } from '../modules/apiHealth';
 import { BIconPlusCircleFill, BIconChevronUp, BIconChevronDown } from 'bootstrap-icons-vue';
 
 export default {
@@ -96,6 +100,13 @@ export default {
       processForm,
     } = useSecretForm({ cryptojs, router });
 
+    // API health check
+    const { apiStatus, apiStatusMessage, apiReady, checkApiHealth } = useApiHealth();
+    
+    onMounted(() => {
+      checkApiHealth();
+    });
+
     return {
       submitIsEnabled,
       submitInProcess,
@@ -106,6 +117,9 @@ export default {
       processForm,
       showOptions,
       toggleOptions,
+      apiStatus,
+      apiStatusMessage,
+      apiReady,
     };
   },
 };
