@@ -1,7 +1,7 @@
 <template>
   <form class="form-container" @submit.prevent="processForm">
     <div v-if="apiStatus === 'error'" class="alert alert-danger mb-4" role="alert">
-      <strong>{{ $t('common.error') }}:</strong> {{ apiStatusMessage || $t('home.api.unavailable') }}
+      <strong>{{ $t('common.error') }}:</strong> {{ $t('home.api.unavailable') }}
     </div>
     <div class="mb-4">
       <h5>{{ $t('home.title') }}</h5>
@@ -42,6 +42,7 @@
     <div class="mt-4 form-buttons">
       <button @click="processForm" type="button" class="btn btn-primary btn-lg submit-button" :class="{
         'is-loading': submitInProcess,
+        'cursor-not-allowed': !submitIsEnabled || apiStatus === 'error'
       }" :disabled="!submitIsEnabled || apiStatus === 'error'">
         <BIconPlusCircleFill />&nbsp;<span class="span-after-icon">{{ submitInProcess ? `${$t('home.form.creating')}...`
           : $t('home.form.create') }}</span>
