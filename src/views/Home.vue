@@ -168,9 +168,16 @@ export default {
 // Animation for collapsible section
 .collapse-enter-active,
 .collapse-leave-active {
-  transition: all 0.3s ease;
+  transition-property: max-height, opacity;
+  transition-duration: 0.25s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   max-height: 300px;
   overflow: hidden;
+  opacity: 1;
+}
+
+.collapse-leave-active {
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
 }
 
 .collapse-enter-from,
