@@ -18,6 +18,13 @@
 		"weeks_2": "weeks",
 		"weeks_5": "weeks"
 	},
+	"expiration": {
+		"minutes": "Minutes",
+		"hours": "Hours",
+		"days": "Days",
+		"weeks": "Weeks",
+		"months": "Months"
+	},
 	"home": {
 		"title": "Secure any data: password, message or link",
 		"subtitle": "Keep sensitive info out of your chats and notes",

@@ -29,23 +29,7 @@
           <input type="text" class="form-control" id="inputGroupSelect01" :placeholder="`${$t('home.form.passphrase')}`"
             autocomplete="off" maxlength="64" v-model="secretPassword" />
         </div>
-        <div class="mb-3 input-group">
-          <label class="input-group-text noselect" for="inputGroupSelect02">{{ $t('home.form.expires') }}</label>
-          <select class="form-select" id="inputGroupSelect02" v-model="secretLifetime">
-            <option :value="5 * 60">5 {{ $t('common.minutes_5') }}</option>
-            <option :value="10 * 60">10 {{ $t('common.minutes_5') }}</option>
-            <option :value="30 * 60">30 {{ $t('common.minutes_5') }}</option>
-            <option :value="60 * 60">1 {{ $t('common.hours_1') }}</option>
-            <option :value="3 * 60 * 60">3 {{ $t('common.hours_2') }}</option>
-            <option :value="6 * 60 * 60">6 {{ $t('common.hours_5') }}</option>
-            <option :value="12 * 60 * 60">12 {{ $t('common.hours_5') }}</option>
-            <option :value="24 * 60 * 60">24 {{ $t('common.hours_2') }}</option>
-            <option :value="3 * 24 * 60 * 60">3 {{ $t('common.days_2') }}</option>
-            <option :value="7 * 24 * 60 * 60">1 {{ $t('common.weeks_1') }}</option>
-            <option :value="14 * 24 * 60 * 60">2 {{ $t('common.weeks_2') }}</option>
-            <option :value="30 * 24 * 60 * 60" selected>1 {{ $t('common.months_1') }}</option>
-          </select>
-        </div>
+        <ExpirationSelect id="inputGroupSelect02" v-model="secretLifetime" :disabled="apiStatus === 'error'" />
         <div class="input-check">
           <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="secretIsBurnable">
           <label class="form-check-label noselect" for="flexCheckDefault">
@@ -72,12 +56,14 @@ import { useRouter } from 'vue-router';
 import { useSecretForm } from '../modules/secretFormProcessor';
 import { useApiHealth } from '../modules/apiHealth';
 import { BIconPlusCircleFill, BIconChevronUp, BIconChevronDown } from 'bootstrap-icons-vue';
+import ExpirationSelect from '../components/ExpirationSelect.vue';
 
 export default {
   components: {
     BIconPlusCircleFill,
     BIconChevronUp,
     BIconChevronDown,
+    ExpirationSelect,
   },
   setup() {
     const cryptojs = inject('cryptojs');
@@ -102,7 +88,7 @@ export default {
 
     // API health check
     const { apiStatus, apiStatusMessage, apiReady, checkApiHealth } = useApiHealth();
-    
+
     onMounted(() => {
       checkApiHealth();
     });
@@ -160,11 +146,12 @@ export default {
     padding: 8px 12px;
     border-radius: 6px;
     transition: all 0.2s ease;
-    
-    &:hover, &:focus {
+
+    &:hover,
+    &:focus {
       background-color: rgba(var(--bs-secondary-rgb), 0.1);
     }
-    
+
     &:active {
       background-color: rgba(var(--bs-secondary-rgb), 0.2);
     }
