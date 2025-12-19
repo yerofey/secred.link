@@ -11,17 +11,18 @@
 [secred.link](https://secred.link) is a secure data sharing platform that allows you to safely share sensitive information like passwords, messages, or links. The data is encrypted and can only be accessed by the intended recipient.
 
 The project consists of two parts:
+
 - Frontend (this repository)
 - [Backend API](https://github.com/yerofey/api.secred.link)
 
 ## Features
 
-- 🔒 End-to-end encryption
-- 🔗 Secure link sharing
-- 📝 Message encryption
-- 🔑 Password protection
-- ⏰ Time-based expiration
-- 🌐 Web-based interface
+- End-to-end encryption
+- Secure link sharing
+- Message encryption
+- Password protection
+- Time-based expiration
+- Web-based interface
 
 ## API Documentation
 
@@ -32,7 +33,8 @@ The API is available at [api.secred.link](https://github.com/yerofey/api.secred.
 **Endpoint**: `/secret/create`  
 **Method**: `POST`  
 **Request Body**:
-```js
+
+```jsonc
 {
   "accessKey": "41c80e9ed6d1a3a41128a99a3c02749f0cbb9dc80902bac0a7aeb08b66591248", // string: 64 symbols
   "manageKey": "9b2959b7d3b2e684dde08960b1192a565f5823bde4bb1946f0043c2855bf83de", // string: 64 symbols
@@ -44,8 +46,10 @@ The API is available at [api.secred.link](https://github.com/yerofey/api.secred.
   "v": 0 // int
 }
 ```
+
 **Response** (201):
-```js
+
+```json
 {
   "data": {
     "success": true
@@ -58,7 +62,8 @@ The API is available at [api.secred.link](https://github.com/yerofey/api.secred.
 **Endpoint**: `/secret/get/{accessKey}`  
 **Method**: `GET`  
 **Response** (200):
-```js
+
+```json
 {
   "data": {
     "content": "53616c7465645f5f0a8c9dd4571f411b3fe8002ca375676475b39987b3b90cfb",
@@ -81,18 +86,21 @@ The API is available at [api.secred.link](https://github.com/yerofey/api.secred.
 
 ### Installation
 
-1. Clone the repository:
+1; Clone the repository:
+
 ```bash
 git clone https://github.com/yerofey/secred.link.git
 cd secred.link
 ```
 
-2. Prepare config file:
+2; Prepare config file:
+
 ```bash
 cp .env.example .env
 ```
 
-3. Install dependencies:
+3; Install dependencies:
+
 ```bash
 # using NPM
 npm install
@@ -101,6 +109,7 @@ npm install
 ### Development
 
 Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -108,11 +117,13 @@ npm run dev
 ### Production Build
 
 Build for production:
+
 ```bash
 npm run build
 ```
 
 Preview production build:
+
 ```bash
 npm run serve
 ```
