@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
+		"dev:package-lock": "npm i --package-lock-only",
 		"build": "vite build",
 		"serve": "vite preview",
 		"lint": "biome lint .",
