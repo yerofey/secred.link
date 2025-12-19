@@ -45,61 +45,63 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import Storage from '../modules/storage';
-import human from 'human-time';
 import {
-  BIconTrash2Fill,
-  BIconLockFill,
-  BIconUnlockFill,
+	BIconLockFill,
+	BIconTrash2Fill,
+	BIconUnlockFill,
 } from 'bootstrap-icons-vue';
+import human from 'human-time';
+import { onMounted, ref } from 'vue';
+import Storage from '../modules/storage';
 
 export default {
-  components: {
-    BIconTrash2Fill,
-    BIconLockFill,
-    BIconUnlockFill,
-  },
-  setup() {
-    const storage = new Storage();
+	components: {
+		BIconTrash2Fill,
+		BIconLockFill,
+		BIconUnlockFill,
+	},
+	setup() {
+		const storage = new Storage();
 
-    const isLoading = ref(false);
-    const isEmpty = ref(true);
-    const items = ref({});
+		const isLoading = ref(false);
+		const isEmpty = ref(true);
+		const items = ref({});
 
-    const clearStorage = () => {
-      storage.removeAllItems('secret_');
-      items.value = {};
-      isEmpty.value = true;
-    };
+		const clearStorage = () => {
+			storage.removeAllItems('secret_');
+			items.value = {};
+			isEmpty.value = true;
+		};
 
-    const displayItems = () => {
-      // get all items from storage
-      const _items = storage.getAllItems('secret_');
-      // sort by timestamp
-      const sortedItemsKeys = Object.keys(_items).sort((keyA, keyB) => _items[keyB].timestamp - _items[keyA].timestamp);
-      const sortedItems = {};
-      for (const key of sortedItemsKeys) {
-        sortedItems[key] = _items[key];
-      }
-      // fill values
-      items.value = sortedItems;
-      // console.log('items', sortedItems);
-      isEmpty.value = (Object.values(_items).length === 0);
-    }
+		const displayItems = () => {
+			// get all items from storage
+			const _items = storage.getAllItems('secret_');
+			// sort by timestamp
+			const sortedItemsKeys = Object.keys(_items).sort(
+				(keyA, keyB) => _items[keyB].timestamp - _items[keyA].timestamp,
+			);
+			const sortedItems = {};
+			for (const key of sortedItemsKeys) {
+				sortedItems[key] = _items[key];
+			}
+			// fill values
+			items.value = sortedItems;
+			// console.log('items', sortedItems);
+			isEmpty.value = Object.values(_items).length === 0;
+		};
 
-    onMounted(() => {
-      displayItems();
-    });
+		onMounted(() => {
+			displayItems();
+		});
 
-    return {
-      isLoading,
-      isEmpty,
-      clearStorage,
-      human,
-      items,
-    };
-  },
+		return {
+			isLoading,
+			isEmpty,
+			clearStorage,
+			human,
+			items,
+		};
+	},
 };
 </script>
 

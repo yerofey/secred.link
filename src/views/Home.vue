@@ -52,63 +52,68 @@
 </template>
 
 <script>
-import { inject, ref, onMounted } from 'vue';
+import {
+	BIconChevronDown,
+	BIconChevronUp,
+	BIconPlusCircleFill,
+} from 'bootstrap-icons-vue';
+import { inject, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useSecretForm } from '../modules/secretFormProcessor';
-import { useApiHealth } from '../modules/apiHealth';
-import { BIconPlusCircleFill, BIconChevronUp, BIconChevronDown } from 'bootstrap-icons-vue';
 import ExpirationSelect from '../components/ExpirationSelect.vue';
+import { useApiHealth } from '../modules/apiHealth';
+import { useSecretForm } from '../modules/secretFormProcessor';
 
 export default {
-  components: {
-    BIconPlusCircleFill,
-    BIconChevronUp,
-    BIconChevronDown,
-    ExpirationSelect,
-  },
-  setup() {
-    const cryptojs = inject('cryptojs');
-    const router = useRouter();
+	components: {
+		BIconPlusCircleFill,
+		BIconChevronUp,
+		BIconChevronDown,
+		ExpirationSelect,
+	},
+	setup() {
+		const cryptojs = inject('cryptojs');
+		const router = useRouter();
 
-    // Options toggle state
-    const showOptions = ref(false);
-    const toggleOptions = () => {
-      showOptions.value = !showOptions.value;
-    };
+		// Options toggle state
+		const showOptions = ref(false);
+		const toggleOptions = () => {
+			showOptions.value = !showOptions.value;
+		};
 
-    // Use the extracted form processor module
-    const {
-      submitIsEnabled,
-      submitInProcess,
-      secretContent,
-      secretPassword,
-      secretLifetime,
-      secretIsBurnable,
-      processForm,
-    } = useSecretForm({ cryptojs, router });
+		// Use the extracted form processor module
+		const {
+			submitIsEnabled,
+			submitInProcess,
+			secretContent,
+			secretPassword,
+			secretLifetime,
+			secretIsBurnable,
+			processForm,
+		} = useSecretForm({ cryptojs, router });
 
-    // API health check
-    const { apiStatus, apiStatusMessage, apiReady, checkApiHealth } = useApiHealth();
+		// API health check
+		const { apiStatus, apiStatusMessage, apiReady, checkApiHealth } =
+			useApiHealth();
 
-    onMounted(() => {
-      checkApiHealth();
-    });
+		onMounted(() => {
+			checkApiHealth();
+		});
 
-    return {
-      submitIsEnabled,
-      submitInProcess,
-      secretContent,
-      secretPassword,
-      secretLifetime,
-      secretIsBurnable,
-      processForm,
-      showOptions,
-      toggleOptions,
-      apiStatus,
-      apiStatusMessage,
-      apiReady,
-    };
-  },
+		return {
+			submitIsEnabled,
+			submitInProcess,
+			secretContent,
+			secretPassword,
+			secretLifetime,
+			secretIsBurnable,
+			processForm,
+			showOptions,
+			toggleOptions,
+			apiStatus,
+			apiStatusMessage,
+			apiReady,
+		};
+	},
 };
 </script>
 

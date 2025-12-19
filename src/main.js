@@ -1,15 +1,15 @@
 import { createApp } from 'vue';
-import { i18n } from './i18n.js';
 import VueCryptojs from 'vue-cryptojs';
 import App from './App.vue';
-import router from './router';
-
+import { i18n } from './i18n.js';
 // delete old items
 import Storage from './modules/storage';
+import router from './router';
+
 const storage = new Storage();
 const oldPrefix = 'secred__';
 if (Object.values(storage.getAllItems(oldPrefix)).length > 0) {
-  storage.removeAllItems(oldPrefix);
+	storage.removeAllItems(oldPrefix);
 }
 
 // styles
@@ -24,9 +24,9 @@ app.use(VueCryptojs);
 
 // attr v-focus
 app.directive('focus', {
-  mounted(el) {
-    el.focus();
-  },
+	mounted(el) {
+		el.focus();
+	},
 });
 
 app.mount('#app');

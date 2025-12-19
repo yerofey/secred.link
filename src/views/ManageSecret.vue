@@ -29,71 +29,68 @@
 </template>
 
 <script>
+import { BIconClipboard, BIconClipboardCheck } from 'bootstrap-icons-vue';
 import { onMounted, ref } from 'vue';
+import useClipboard from 'vue-clipboard3';
 import { useRoute } from 'vue-router';
 import Storage from '../modules/storage';
-import {
-  BIconClipboard,
-  BIconClipboardCheck,
-} from 'bootstrap-icons-vue';
-import useClipboard from 'vue-clipboard3';
 import { log } from '../modules/utils';
 
 export default {
-  components: {
-    BIconClipboard,
-    BIconClipboardCheck,
-  },
-  setup() {
-    const route = useRoute();
-    const storage = new Storage();
-    const { toClipboard } = useClipboard();
+	components: {
+		BIconClipboard,
+		BIconClipboardCheck,
+	},
+	setup() {
+		const route = useRoute();
+		const storage = new Storage();
+		const { toClipboard } = useClipboard();
 
-    const hash = route.hash.substring(1);
-    // TODO: validate hash
-    const sid = hash;
+		const hash = route.hash.substring(1);
+		// TODO: validate hash
+		const sid = hash;
 
-    const isLoading = ref(true);
-    const isCopied = ref(false);
-    const secretItem = ref({});
-    const secretShareLink = ref('');
+		const isLoading = ref(true);
+		const isCopied = ref(false);
+		const secretItem = ref({});
+		const secretShareLink = ref('');
 
-    const getLocalSecret = () => {
-      const secretKey = `secret_${sid}`;
-      if (storage.hasKey(secretKey)) {
-        secretItem.value = storage.getItem(secretKey);
+		const getLocalSecret = () => {
+			const secretKey = `secret_${sid}`;
+			if (storage.hasKey(secretKey)) {
+				secretItem.value = storage.getItem(secretKey);
 
-        if (secretItem.value.keys.accessKey !== undefined) {
-          secretShareLink.value = `${import.meta.env.VITE_APP_URL}/view#${secretItem.value.keys.accessKey}`;
-        }
-      } else {
-        log('NO_KEY');
-      }
+				if (secretItem.value.keys.accessKey !== undefined) {
+					secretShareLink.value = `${import.meta.env.VITE_APP_URL}/view#${secretItem.value.keys.accessKey}`;
+				}
+			} else {
+				log('NO_KEY');
+			}
 
-      isLoading.value = false;
-    }
+			isLoading.value = false;
+		};
 
-    const copyLink = async () => {
-      try {
-        await toClipboard(secretShareLink.value);
-        isCopied.value = true;
-      } catch (e) {
-        console.error(e);
-      }
-    };
+		const copyLink = async () => {
+			try {
+				await toClipboard(secretShareLink.value);
+				isCopied.value = true;
+			} catch (e) {
+				console.error(e);
+			}
+		};
 
-    onMounted(() => {
-      getLocalSecret();
-    });
+		onMounted(() => {
+			getLocalSecret();
+		});
 
-    return {
-      isLoading,
-      isCopied,
-      secretItem,
-      secretShareLink,
-      copyLink,
-    };
-  },
+		return {
+			isLoading,
+			isCopied,
+			secretItem,
+			secretShareLink,
+			copyLink,
+		};
+	},
 };
 </script>
 

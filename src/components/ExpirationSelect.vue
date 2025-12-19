@@ -40,56 +40,59 @@
 
 <script>
 export default {
-    name: 'ExpirationSelect',
-    props: {
-        id: {
-            type: String,
-            default: 'expirationSelect'
-        },
-        modelValue: {
-            type: Number,
-            required: true
-        },
-        disabled: {
-            type: Boolean,
-            default: false
-        }
-    },
-    emits: ['update:modelValue'],
-    created() {
-        // If no expiration is selected, default to 1 month
-        if (!this.modelValue) {
-            this.$emit('update:modelValue', 30 * 24 * 60 * 60);
-        }
-    },
-    methods: {
-        /**
-         * Get the appropriate time unit form based on count and locale
-         * @param {string} unit - The time unit (minute, hour, day, week, month)
-         * @param {number} count - The count of units
-         * @returns {string} - Localized time unit
-         */
-        getTimeUnitForm(unit, count) {
-            const locale = this.$i18n.locale;
-            
-            // Special handling for Russian and similar languages with complex pluralization
-            if (locale === 'ru') {
-                // Russian pluralization rules
-                if (count % 10 === 1 && count % 100 !== 11) {
-                    return this.$t(`common.time_units.${unit}.one`);
-                } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
-                    return this.$t(`common.time_units.${unit}.few`);
-                } else {
-                    return this.$t(`common.time_units.${unit}.many`);
-                }
-            } else {
-                // Default handling for English and similar languages
-                return count === 1 
-                    ? this.$t(`common.time_units.${unit}.one`) 
-                    : this.$t(`common.time_units.${unit}.other`);
-            }
-        }
-    }
+	name: 'ExpirationSelect',
+	props: {
+		id: {
+			type: String,
+			default: 'expirationSelect',
+		},
+		modelValue: {
+			type: Number,
+			required: true,
+		},
+		disabled: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	emits: ['update:modelValue'],
+	created() {
+		// If no expiration is selected, default to 1 month
+		if (!this.modelValue) {
+			this.$emit('update:modelValue', 30 * 24 * 60 * 60);
+		}
+	},
+	methods: {
+		/**
+		 * Get the appropriate time unit form based on count and locale
+		 * @param {string} unit - The time unit (minute, hour, day, week, month)
+		 * @param {number} count - The count of units
+		 * @returns {string} - Localized time unit
+		 */
+		getTimeUnitForm(unit, count) {
+			const locale = this.$i18n.locale;
+
+			// Special handling for Russian and similar languages with complex pluralization
+			if (locale === 'ru') {
+				// Russian pluralization rules
+				if (count % 10 === 1 && count % 100 !== 11) {
+					return this.$t(`common.time_units.${unit}.one`);
+				} else if (
+					[2, 3, 4].includes(count % 10) &&
+					![12, 13, 14].includes(count % 100)
+				) {
+					return this.$t(`common.time_units.${unit}.few`);
+				} else {
+					return this.$t(`common.time_units.${unit}.many`);
+				}
+			} else {
+				// Default handling for English and similar languages
+				return count === 1
+					? this.$t(`common.time_units.${unit}.one`)
+					: this.$t(`common.time_units.${unit}.other`);
+			}
+		},
+	},
 };
 </script>
 

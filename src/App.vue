@@ -47,44 +47,47 @@
 </template>
 
 <script>
-import { onMounted, watch } from 'vue';
+import { useColorMode, useDark } from '@vueuse/core';
 import {
-  BIconBookmarkStarFill,
-  BIconMoonFill,
-  BIconSunFill,
+	BIconBookmarkStarFill,
+	BIconMoonFill,
+	BIconSunFill,
 } from 'bootstrap-icons-vue';
-import { useDark, useColorMode } from '@vueuse/core';
+import { onMounted, watch } from 'vue';
 
 export default {
-  components: {
-    BIconBookmarkStarFill,
-    BIconMoonFill,
-    BIconSunFill,
-  },
-  setup() {
-    const colorMode = useColorMode();
-    useDark({
-      selector: 'html',
-      attribute: 'data-bs-theme',
-      valueDark: 'dark',
-      valueLight: 'light'
-    });
+	components: {
+		BIconBookmarkStarFill,
+		BIconMoonFill,
+		BIconSunFill,
+	},
+	setup() {
+		const colorMode = useColorMode();
+		useDark({
+			selector: 'html',
+			attribute: 'data-bs-theme',
+			valueDark: 'dark',
+			valueLight: 'light',
+		});
 
-    const getThemeColor = (theme) => (theme == 'light' ? '#f9fafb' : '#212529');
-    const changeThemeColor = (color) => document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+		const getThemeColor = (theme) => (theme == 'light' ? '#f9fafb' : '#212529');
+		const changeThemeColor = (color) =>
+			document
+				.querySelector('meta[name="theme-color"]')
+				.setAttribute('content', color);
 
-    onMounted(() => {
-      changeThemeColor(getThemeColor(colorMode));
-    });
+		onMounted(() => {
+			changeThemeColor(getThemeColor(colorMode));
+		});
 
-    watch(colorMode, (newVal, oldVal) => {
-      changeThemeColor(getThemeColor(newVal));
-    });
+		watch(colorMode, (newVal, oldVal) => {
+			changeThemeColor(getThemeColor(newVal));
+		});
 
-    return {
-      colorMode,
-    }
-  },
+		return {
+			colorMode,
+		};
+	},
 };
 </script>
 
