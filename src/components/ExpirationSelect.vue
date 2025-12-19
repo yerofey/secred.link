@@ -104,14 +104,14 @@ export default {
 }
 
 /* Add subtle styling to the optgroups */
-::v-deep optgroup {
+:deep(optgroup) {
     font-style: normal;
     font-weight: 600;
     color: var(--bs-primary);
     background-color: rgba(var(--bs-primary-rgb), 0.05);
 }
 
-::v-deep optgroup option {
+:deep(optgroup option) {
     font-weight: normal;
     color: var(--bs-body-color);
     padding-left: 10px;
