@@ -197,6 +197,24 @@ export class MetricsObject extends DurableObject<Env> {
 		return counters[key];
 	}
 
+	/** Merge given keys into stored counters (absolute values, not deltas). */
+	async seed(toSet: Partial<Record<MetricsCounter, number>>) {
+		const counters =
+			(await this.ctx.storage.get<Partial<Record<MetricsCounter, number>>>(
+				METRICS_STORAGE_KEY,
+			)) ?? {};
+		for (const [key, value] of Object.entries(toSet) as [
+			MetricsCounter,
+			number | undefined,
+		][]) {
+			if (value !== undefined) {
+				counters[key] = value;
+			}
+		}
+		await this.ctx.storage.put(METRICS_STORAGE_KEY, counters);
+		return counters;
+	}
+
 	async all() {
 		return (
 			(await this.ctx.storage.get<Partial<Record<MetricsCounter, number>>>(

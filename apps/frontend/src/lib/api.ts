@@ -35,14 +35,17 @@ export const api = {
 		uploadToken: string,
 		body: Uint8Array,
 	) => {
-		const payload = new Uint8Array(body.byteLength);
-		payload.set(body);
 		const response = await fetch(apiUrl.attachment(accessKeyHash), {
 			method: 'PUT',
 			headers: {
 				[HttpHeader.UploadToken]: uploadToken,
 			},
-			body: payload,
+			body: new Blob([
+				body.buffer.slice(
+					body.byteOffset,
+					body.byteOffset + body.byteLength,
+				) as ArrayBuffer,
+			]),
 		});
 		if (!response.ok) {
 			throw new Error(`Attachment upload failed with ${response.status}`);

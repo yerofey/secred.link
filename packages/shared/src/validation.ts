@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { HASH_LENGTH } from './constants';
+import type { MetricsCounter } from './types';
 
 export const hashSchema = z.string().length(HASH_LENGTH);
 
@@ -30,3 +31,28 @@ export const importSecretSchema = z.object({
 
 export const validateHash = (value: string) =>
 	hashSchema.safeParse(value).success;
+
+const nonNegCounter = z.number().int().min(0);
+
+/** Merge-set counters on the metrics DO (`POST /api/metrics`). At least one field required. */
+export const metricsSeedSchema = z
+	.object({
+		created: nonNegCounter.optional(),
+		requested: nonNegCounter.optional(),
+		burned: nonNegCounter.optional(),
+		deleted: nonNegCounter.optional(),
+		expired: nonNegCounter.optional(),
+		migration_imported: nonNegCounter.optional(),
+	})
+	.strict()
+	.superRefine((val, ctx) => {
+		const keys = (
+			Object.entries(val) as [MetricsCounter, number | undefined][]
+		).filter(([, n]) => n !== undefined);
+		if (keys.length === 0) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Provide at least one counter',
+			});
+		}
+	});

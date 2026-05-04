@@ -65,6 +65,13 @@ export type MetricsResponse = {
 	};
 };
 
+/** Response from `POST /api/metrics` (seed historical counters). */
+export type SeedMetricsResponse = {
+	data: {
+		counters: Partial<Record<MetricsCounter, number>>;
+	};
+};
+
 export type StoredSecret = {
 	access_key: string;
 	manage_key: string;

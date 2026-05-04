@@ -6,6 +6,8 @@ import {
 	ACCESS_KEY_LENGTH,
 	CRYPTO_V3_FILE_PREFIX,
 	CRYPTO_V3_JSON_PREFIX,
+	CRYPTO_V4_FILE_PREFIX,
+	CRYPTO_V4_JSON_PREFIX,
 	DEFAULT_TEST_STRING,
 	DEFAULT_VERSION_PREFIX,
 	HASH_LENGTH,
@@ -108,6 +110,14 @@ type V3SecretEnvelope = {
 	b: { iv: string; d: string };
 };
 
+type V4SecretEnvelope = {
+	v: 4;
+	s: string;
+	i: number;
+	t: { iv: string; d: string };
+	b: { iv: string; d: string };
+};
+
 type V3FileEnvelope = {
 	v: 3;
 	s: string;
@@ -115,12 +125,23 @@ type V3FileEnvelope = {
 	b: { iv: string; d: string };
 };
 
-async function deriveAesGcmKey(
+type V4FileEnvelope = {
+	v: 4;
+	s: string;
+	i: number;
+	b: { iv: string; d: string };
+};
+
+const V4_KDF_INFO = {
+	test: new TextEncoder().encode('secred.v4.kdf.test'),
+	body: new TextEncoder().encode('secred.v4.kdf.body'),
+	file: new TextEncoder().encode('secred.v4.kdf.file'),
+} as const;
+
+async function importPbkdf2BaseKey(
 	password: string,
 	accessKey: string,
-	salt: Uint8Array,
 	versionPrefix: string,
-	iterations: number,
 ): Promise<CryptoKey> {
 	const te = new TextEncoder();
 	const vp = te.encode(versionPrefix);
@@ -131,14 +152,65 @@ async function deriveAesGcmKey(
 	ikm.set(pwDigest, vp.length);
 	ikm.set(akDigest, vp.length + 32);
 
-	const baseKey = await crypto.subtle.importKey(
+	return crypto.subtle.importKey('raw', copyBytes(ikm), 'PBKDF2', false, [
+		'deriveBits',
+		'deriveKey',
+	]);
+}
+
+async function derivePbkdf2MasterBits(
+	password: string,
+	accessKey: string,
+	salt: Uint8Array,
+	versionPrefix: string,
+	iterations: number,
+): Promise<ArrayBuffer> {
+	const baseKey = await importPbkdf2BaseKey(password, accessKey, versionPrefix);
+	return crypto.subtle.deriveBits(
+		{
+			name: 'PBKDF2',
+			salt: copyBytes(salt),
+			iterations,
+			hash: 'SHA-256',
+		},
+		baseKey,
+		256,
+	);
+}
+
+async function deriveV4AesGcmKeyFromMaster(
+	masterBits: ArrayBuffer,
+	info: Uint8Array,
+): Promise<CryptoKey> {
+	const hkdfKey = await crypto.subtle.importKey(
 		'raw',
-		copyBytes(ikm),
-		'PBKDF2',
+		masterBits,
+		'HKDF',
 		false,
 		['deriveKey'],
 	);
+	return crypto.subtle.deriveKey(
+		{
+			name: 'HKDF',
+			hash: 'SHA-256',
+			salt: new Uint8Array(0),
+			info: copyBytes(info),
+		},
+		hkdfKey,
+		{ name: 'AES-GCM', length: 256 },
+		false,
+		['encrypt', 'decrypt'],
+	);
+}
 
+async function deriveAesGcmKey(
+	password: string,
+	accessKey: string,
+	salt: Uint8Array,
+	versionPrefix: string,
+	iterations: number,
+): Promise<CryptoKey> {
+	const baseKey = await importPbkdf2BaseKey(password, accessKey, versionPrefix);
 	return crypto.subtle.deriveKey(
 		{
 			name: 'PBKDF2',
@@ -203,6 +275,106 @@ const encryptSecretPayloadV3 = async ({
 	return { encryptedContent: combined, encryptedTest: combined };
 };
 
+/** One PBKDF2 + HKDF-derived AES keys for test/body/file — used when creating secrets with an attachment. */
+const encryptSecretWithAttachmentV4 = async ({
+	text,
+	password,
+	accessKey,
+	testString,
+	attachmentBytes,
+	attachmentName,
+	attachmentMime,
+}: {
+	text: string;
+	password: string;
+	accessKey: string;
+	testString: string;
+	attachmentBytes: Uint8Array;
+	attachmentName: string;
+	attachmentMime: string;
+}) => {
+	const versionPrefix = getSecretPrefix(accessKey);
+	const salt = randomBytes(16);
+	const ivTest = randomBytes(12);
+	const ivBody = randomBytes(12);
+	const ivFile = randomBytes(12);
+	const masterBits = await derivePbkdf2MasterBits(
+		password,
+		accessKey,
+		salt,
+		versionPrefix,
+		PBKDF2_ITERATIONS,
+	);
+	const testKey = await deriveV4AesGcmKeyFromMaster(
+		masterBits,
+		V4_KDF_INFO.test,
+	);
+	const bodyKey = await deriveV4AesGcmKeyFromMaster(
+		masterBits,
+		V4_KDF_INFO.body,
+	);
+	const fileKey = await deriveV4AesGcmKeyFromMaster(
+		masterBits,
+		V4_KDF_INFO.file,
+	);
+	const te = new TextEncoder();
+
+	const ctFile = new Uint8Array(
+		await crypto.subtle.encrypt(
+			{ name: 'AES-GCM', iv: copyBytes(ivFile) },
+			fileKey,
+			copyBytes(attachmentBytes),
+		),
+	);
+	const fileEnvelope: V4FileEnvelope = {
+		v: 4,
+		s: bytesToBase64url(salt),
+		i: PBKDF2_ITERATIONS,
+		b: { iv: bytesToBase64url(ivFile), d: bytesToBase64url(ctFile) },
+	};
+	const fileJson = JSON.stringify(fileEnvelope);
+	const attachmentCipher = new TextEncoder().encode(
+		CRYPTO_V4_FILE_PREFIX + bytesToBase64url(te.encode(fileJson)),
+	);
+
+	const plainBody = buildSecretPlaintext(text, {
+		storage: 'r2',
+		name: attachmentName,
+		mime: attachmentMime,
+		size: attachmentCipher.byteLength,
+	});
+
+	const ctTest = new Uint8Array(
+		await crypto.subtle.encrypt(
+			{ name: 'AES-GCM', iv: copyBytes(ivTest) },
+			testKey,
+			te.encode(testString),
+		),
+	);
+	const ctBody = new Uint8Array(
+		await crypto.subtle.encrypt(
+			{ name: 'AES-GCM', iv: copyBytes(ivBody) },
+			bodyKey,
+			te.encode(plainBody),
+		),
+	);
+	const secretEnvelope: V4SecretEnvelope = {
+		v: 4,
+		s: bytesToBase64url(salt),
+		i: PBKDF2_ITERATIONS,
+		t: { iv: bytesToBase64url(ivTest), d: bytesToBase64url(ctTest) },
+		b: { iv: bytesToBase64url(ivBody), d: bytesToBase64url(ctBody) },
+	};
+	const combined =
+		CRYPTO_V4_JSON_PREFIX +
+		bytesToBase64url(te.encode(JSON.stringify(secretEnvelope)));
+	return {
+		encryptedContent: combined,
+		encryptedTest: combined,
+		attachmentCipher,
+	};
+};
+
 const decryptSecretPayloadV3 = async ({
 	contentHex,
 	password,
@@ -265,6 +437,84 @@ const decryptSecretPayloadV3 = async ({
 		const ptBody = await crypto.subtle.decrypt(
 			{ name: 'AES-GCM', iv: copyBytes(ivB) },
 			key,
+			copyBytes(ctB),
+		);
+		return { ok: true as const, content: new TextDecoder().decode(ptBody) };
+	} catch {
+		return { ok: false as const, content: '' };
+	}
+};
+
+const decryptSecretPayloadV4 = async ({
+	contentHex,
+	password,
+	accessKey,
+	testString,
+}: {
+	contentHex: string;
+	password: string;
+	accessKey: string;
+	testString: string;
+}) => {
+	if (!contentHex.startsWith(CRYPTO_V4_JSON_PREFIX)) {
+		return { ok: false as const, content: '' };
+	}
+	let envelope: V4SecretEnvelope;
+	try {
+		const raw = new TextDecoder().decode(
+			base64urlToBytes(contentHex.slice(CRYPTO_V4_JSON_PREFIX.length)),
+		);
+		envelope = JSON.parse(raw) as V4SecretEnvelope;
+	} catch {
+		return { ok: false as const, content: '' };
+	}
+	if (
+		envelope.v !== 4 ||
+		typeof envelope.s !== 'string' ||
+		typeof envelope.i !== 'number' ||
+		envelope.i !== PBKDF2_ITERATIONS
+	) {
+		return { ok: false as const, content: '' };
+	}
+	const salt = base64urlToBytes(envelope.s);
+	const versionPrefix = getSecretPrefix(accessKey);
+	let masterBits: ArrayBuffer;
+	try {
+		masterBits = await derivePbkdf2MasterBits(
+			password,
+			accessKey,
+			copyBytes(salt),
+			versionPrefix,
+			envelope.i,
+		);
+	} catch {
+		return { ok: false as const, content: '' };
+	}
+	let testKey: CryptoKey;
+	let bodyKey: CryptoKey;
+	try {
+		testKey = await deriveV4AesGcmKeyFromMaster(masterBits, V4_KDF_INFO.test);
+		bodyKey = await deriveV4AesGcmKeyFromMaster(masterBits, V4_KDF_INFO.body);
+	} catch {
+		return { ok: false as const, content: '' };
+	}
+	try {
+		const ivT = base64urlToBytes(envelope.t.iv);
+		const ctT = base64urlToBytes(envelope.t.d);
+		const ptTest = await crypto.subtle.decrypt(
+			{ name: 'AES-GCM', iv: copyBytes(ivT) },
+			testKey,
+			copyBytes(ctT),
+		);
+		const decryptedTest = new TextDecoder().decode(ptTest);
+		if (decryptedTest !== testString) {
+			return { ok: false as const, content: '' };
+		}
+		const ivB = base64urlToBytes(envelope.b.iv);
+		const ctB = base64urlToBytes(envelope.b.d);
+		const ptBody = await crypto.subtle.decrypt(
+			{ name: 'AES-GCM', iv: copyBytes(ivB) },
+			bodyKey,
 			copyBytes(ctB),
 		);
 		return { ok: true as const, content: new TextDecoder().decode(ptBody) };
@@ -353,6 +603,14 @@ export const decryptSecretPayload = async ({
 	accessKey: string;
 	testString?: string;
 }) => {
+	if (contentHex.startsWith(CRYPTO_V4_JSON_PREFIX)) {
+		return decryptSecretPayloadV4({
+			contentHex,
+			password,
+			accessKey,
+			testString,
+		});
+	}
 	if (contentHex.startsWith(CRYPTO_V3_JSON_PREFIX)) {
 		return decryptSecretPayloadV3({
 			contentHex,
@@ -537,6 +795,54 @@ const decryptAttachmentBytesV3 = async (
 	return new Uint8Array(plain);
 };
 
+const decryptAttachmentBytesV4 = async (
+	cipherUtf8: Uint8Array,
+	password: string,
+	accessKey: string,
+): Promise<Uint8Array> => {
+	const encStr = new TextDecoder().decode(cipherUtf8);
+	if (!encStr.startsWith(CRYPTO_V4_FILE_PREFIX)) {
+		throw new Error('attachment_decrypt_failed');
+	}
+	let envelope: V4FileEnvelope;
+	try {
+		const raw = new TextDecoder().decode(
+			base64urlToBytes(encStr.slice(CRYPTO_V4_FILE_PREFIX.length)),
+		);
+		envelope = JSON.parse(raw) as V4FileEnvelope;
+	} catch {
+		throw new Error('attachment_decrypt_failed');
+	}
+	if (
+		envelope.v !== 4 ||
+		envelope.i !== PBKDF2_ITERATIONS ||
+		typeof envelope.s !== 'string'
+	) {
+		throw new Error('attachment_decrypt_failed');
+	}
+	const salt = base64urlToBytes(envelope.s);
+	const versionPrefix = getSecretPrefix(accessKey);
+	const masterBits = await derivePbkdf2MasterBits(
+		password,
+		accessKey,
+		copyBytes(salt),
+		versionPrefix,
+		envelope.i,
+	);
+	const fileKey = await deriveV4AesGcmKeyFromMaster(
+		masterBits,
+		V4_KDF_INFO.file,
+	);
+	const iv = base64urlToBytes(envelope.b.iv);
+	const ct = base64urlToBytes(envelope.b.d);
+	const plain = await crypto.subtle.decrypt(
+		{ name: 'AES-GCM', iv: copyBytes(iv) },
+		fileKey,
+		copyBytes(ct),
+	);
+	return new Uint8Array(plain);
+};
+
 /** Legacy attachment encrypt — for tests only. */
 export const encryptAttachmentBytesLegacy = (
 	bytes: Uint8Array,
@@ -577,6 +883,9 @@ export const decryptAttachmentBytes = async (
 	accessKey: string,
 ): Promise<Uint8Array> => {
 	const head = new TextDecoder().decode(cipherUtf8.slice(0, 64));
+	if (head.startsWith(CRYPTO_V4_FILE_PREFIX)) {
+		return decryptAttachmentBytesV4(cipherUtf8, password, accessKey);
+	}
 	if (head.startsWith(CRYPTO_V3_FILE_PREFIX)) {
 		return decryptAttachmentBytesV3(cipherUtf8, password, accessKey);
 	}
@@ -605,36 +914,39 @@ export const buildCreateSecretPayload = async ({
 	const { accessKeyHash2, sid } = getAccessKeyHashes(accessKey);
 	const manageKeyHash2 = getManageKeyHash(manageKey);
 
-	let plainBody: string;
 	let attachmentUploadToken: string | undefined;
 	let attachmentCipher: Uint8Array | undefined;
 	let attachmentUploadTokenHash: string | undefined;
+	let encryptedContent: string;
+	let encryptedTest: string;
 
 	if (attachment) {
 		const uploadToken = makeUploadToken();
-		attachmentCipher = await encryptAttachmentBytes(
-			attachment.bytes,
+		const v4 = await encryptSecretWithAttachmentV4({
+			text,
 			password,
 			accessKey,
-		);
-		plainBody = buildSecretPlaintext(text, {
-			storage: 'r2',
-			name: attachment.name,
-			mime: attachment.mime,
-			size: attachmentCipher.byteLength,
+			testString,
+			attachmentBytes: attachment.bytes,
+			attachmentName: attachment.name,
+			attachmentMime: attachment.mime,
 		});
+		attachmentCipher = v4.attachmentCipher;
+		encryptedContent = v4.encryptedContent;
+		encryptedTest = v4.encryptedTest;
 		attachmentUploadToken = uploadToken;
 		attachmentUploadTokenHash = hashString(uploadToken);
 	} else {
-		plainBody = buildSecretPlaintext(text, undefined);
+		const plainBody = buildSecretPlaintext(text, undefined);
+		const enc = await encryptSecretPayload({
+			content: plainBody,
+			password,
+			accessKey,
+			testString,
+		});
+		encryptedContent = enc.encryptedContent;
+		encryptedTest = enc.encryptedTest;
 	}
-
-	const { encryptedContent, encryptedTest } = await encryptSecretPayload({
-		content: plainBody,
-		password,
-		accessKey,
-		testString,
-	});
 	const hasPassword = password.length > 0;
 	const contentHexHash = hashString(encryptedContent);
 	const dataHash = hashString(

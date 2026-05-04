@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import {
 	buildCreateSecretPayload,
+	CRYPTO_V4_FILE_PREFIX,
+	CRYPTO_V4_JSON_PREFIX,
 	decryptAttachmentBytes,
 	decryptSecretPayload,
 	encryptAttachmentBytes,
@@ -110,5 +112,55 @@ describe('crypto helpers', () => {
 		});
 
 		expect(payload.localSecret.attachmentCount).toBe(1);
+	});
+
+	test('v4 envelope: create with attachment uses one KDF bundle (prefixes + round-trip)', async () => {
+		const payload = await buildCreateSecretPayload({
+			text: 'body text',
+			password: 'secret-pw',
+			lifetime: 3600,
+			isBurnable: false,
+			attachment: {
+				bytes: new Uint8Array([10, 20, 30]),
+				name: 'blob.bin',
+				mime: 'application/octet-stream',
+			},
+		});
+
+		expect(payload.request.ciphertext.startsWith(CRYPTO_V4_JSON_PREFIX)).toBe(
+			true,
+		);
+		const attachmentCipher = payload.attachmentCipher;
+		if (!attachmentCipher) {
+			throw new Error('expected attachment cipher');
+		}
+		expect(
+			new TextDecoder()
+				.decode(attachmentCipher)
+				.startsWith(CRYPTO_V4_FILE_PREFIX),
+		).toBe(true);
+
+		const secret = await decryptSecretPayload({
+			contentHex: payload.request.ciphertext,
+			testHex: payload.request.testCiphertext,
+			password: 'secret-pw',
+			accessKey: payload.accessKey,
+		});
+		expect(secret.ok).toBe(true);
+		if (secret.ok) {
+			const parsed = parseDecryptedPayload(secret.content);
+			expect(parsed.kind).toBe('v2');
+			if (parsed.kind === 'v2') {
+				expect(parsed.text).toBe('body text');
+				expect(parsed.attachment?.name).toBe('blob.bin');
+			}
+		}
+
+		const plainFile = await decryptAttachmentBytes(
+			attachmentCipher as Uint8Array,
+			'secret-pw',
+			payload.accessKey,
+		);
+		expect(plainFile).toEqual(new Uint8Array([10, 20, 30]));
 	});
 });

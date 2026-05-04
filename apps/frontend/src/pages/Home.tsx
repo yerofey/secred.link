@@ -1,5 +1,4 @@
 import {
-	buildCreateSecretPayload,
 	DEFAULT_SECRET_LIFETIME_SECONDS,
 	DEFAULT_TEST_STRING,
 	DEFAULT_VERSION_PREFIX,
@@ -29,6 +28,8 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { getPasswordStrength } from '@/lib/passwordStrength';
+import { buildCreateSecretPayloadForSubmit } from '@/lib/secret-create-payload';
+import { devMeasureAsync } from '@/lib/secret-submit-perf';
 import { saveLocalSecret } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 
@@ -61,6 +62,10 @@ export function Home() {
 	const [lifetime, setLifetime] = useState(DEFAULT_SECRET_LIFETIME_SECONDS);
 	const [isBurnable, setIsBurnable] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitPhase, setSubmitPhase] = useState<
+		'idle' | 'encrypt' | 'save' | 'file'
+	>('idle');
+	const submitInFlightRef = useRef(false);
 	const [attachment, setAttachment] = useState<File | null>(null);
 	const [optionalSettingsOpen, setOptionalSettingsOpen] = useState(false);
 	const [richEditor, setRichEditor] = useState<Editor | null>(null);
@@ -75,19 +80,25 @@ export function Home() {
 	}, []);
 
 	const submit = async () => {
+		if (submitInFlightRef.current) {
+			return;
+		}
 		const hasText = content.trim().length > 0;
 		if ((!hasText && !attachment) || apiStatus === 'error') {
 			return;
 		}
+		if (attachment && attachment.size > MAX_ATTACHMENT_BYTES) {
+			return;
+		}
+
+		submitInFlightRef.current = true;
 		setIsSubmitting(true);
+		setSubmitPhase('encrypt');
 		try {
 			let attachmentArg:
 				| { bytes: Uint8Array; name: string; mime: string }
 				| undefined;
 			if (attachment) {
-				if (attachment.size > MAX_ATTACHMENT_BYTES) {
-					return;
-				}
 				const buffer = await attachment.arrayBuffer();
 				attachmentArg = {
 					bytes: new Uint8Array(buffer),
@@ -95,27 +106,44 @@ export function Home() {
 					mime: attachment.type || 'application/octet-stream',
 				};
 			}
-			const payload = await buildCreateSecretPayload({
-				text: content,
-				password,
-				lifetime,
-				isBurnable,
-				versionPrefix: DEFAULT_VERSION_PREFIX,
-				testString: DEFAULT_TEST_STRING,
-				attachment: attachmentArg,
-			});
-			await api.createSecret(payload.request);
-			if (payload.attachmentCipher && payload.attachmentUploadToken) {
-				await api.uploadSecretAttachment(
-					payload.request.accessKey,
-					payload.attachmentUploadToken,
-					payload.attachmentCipher,
+			const payload = await devMeasureAsync('secret:build', () =>
+				buildCreateSecretPayloadForSubmit(
+					{
+						text: content,
+						password,
+						lifetime,
+						isBurnable,
+						versionPrefix: DEFAULT_VERSION_PREFIX,
+						testString: DEFAULT_TEST_STRING,
+						attachment: attachmentArg,
+					},
+					{ attachmentFile: attachment },
+				),
+			);
+
+			setSubmitPhase('save');
+			await devMeasureAsync('secret:api:create', () =>
+				api.createSecret(payload.request),
+			);
+
+			const attachmentCipher = payload.attachmentCipher;
+			const attachmentUploadToken = payload.attachmentUploadToken;
+			if (attachmentCipher && attachmentUploadToken) {
+				setSubmitPhase('file');
+				await devMeasureAsync('secret:upload', () =>
+					api.uploadSecretAttachment(
+						payload.request.accessKey,
+						attachmentUploadToken,
+						attachmentCipher,
+					),
 				);
 			}
 			saveLocalSecret(payload.localSecret, lifetime);
 			navigate({ pathname: '/manage', hash: payload.sid });
 		} finally {
+			submitInFlightRef.current = false;
 			setIsSubmitting(false);
+			setSubmitPhase('idle');
 		}
 	};
 
@@ -139,6 +167,16 @@ export function Home() {
 			)}`
 		: t('home.rail.none');
 	const passwordEnabled = password.length > 0;
+	const submitActionLabel = !isSubmitting
+		? t('home.form.create')
+		: submitPhase === 'encrypt'
+			? `${t('home.form.phase_encrypting')}…`
+			: submitPhase === 'save'
+				? `${t('home.form.phase_saving')}…`
+				: submitPhase === 'file'
+					? `${t('home.form.phase_uploading_file')}…`
+					: `${t('home.form.creating')}…`;
+
 	const submitHint = (() => {
 		if (apiStatus === 'error') {
 			return t('home.form.submit_api_unavailable');
@@ -406,9 +444,7 @@ export function Home() {
 							disabled={disabled}
 						>
 							<PlusCircle />
-							{isSubmitting
-								? `${t('home.form.creating')}...`
-								: t('home.form.create')}
+							{submitActionLabel}
 						</Button>
 						<p
 							className={cn(

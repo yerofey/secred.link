@@ -6,7 +6,7 @@ Secure, expiring secret sharing: you write content (Markdown or rich text), opti
 
 ## Features
 
-- **Client-side encryption** — Payloads use modern envelopes (`v3.j.` JSON + AES-GCM with PBKDF2); older links may still use legacy CryptoJS ciphertext (decrypt-only path).
+- **Client-side encryption** — Text-only secrets use `v3.j.` (PBKDF2 + AES-GCM). **Secrets with a file attachment** use `v4.j.` / `v4.f.`: one PBKDF2 pass, then HKDF-derived subkeys for the test string, body JSON, and file. Older links may still use `v3`+`v3` (two PBKDF2) or legacy CryptoJS (decrypt-only).
 - **Password-protected secrets** — Offline guessing cost is dominated by PBKDF2 iterations; users should pick strong passphrases (the UI shows rough strength hints).
 - **Optional burn-after-read** — Supported for text-only flows; attachments use a separate burn-token window where configured.
 - **Manage link** — After creating a secret, owners get a manage URL (stored briefly in `localStorage`) to copy the viewer link or delete the secret server-side.
@@ -102,6 +102,7 @@ All JSON routes live under `/api`. The frontend uses helpers from `packages/shar
 | PUT | `/api/secrets/:accessKeyHash/attachment` | Upload encrypted attachment (`X-Upload-Token`) |
 | GET | `/api/secrets/:accessKeyHash/attachment` | Download (optional `burnToken` query) |
 | GET | `/api/metrics` | **Disabled until** `METRICS_TOKEN` is set; then requires `Authorization: Bearer …` |
+| POST | `/api/metrics` | Same auth as GET; body JSON sets **absolute** counter values (merge). Example: `{"created":1000,"requested":5000}`. Omitted keys are left unchanged. |
 
 Plaintext never appears in these payloads.
 
@@ -137,6 +138,17 @@ wrangler secret put MIGRATION_TOKEN
 ```
 
 For local development you can put the same keys in a `.dev.vars` file (not committed).
+
+**Seeding historical metrics** (e.g. after moving from a previous stack), with `METRICS_TOKEN` in place:
+
+```bash
+curl -sS -X POST "https://secred.link/api/metrics" \
+  -H "Authorization: Bearer $METRICS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"created":12345,"requested":67890}'
+```
+
+Use **non-negative integers**; allowed keys: `created`, `requested`, `burned`, `deleted`, `expired`, `migration_imported`. Then `GET /api/metrics` to verify.
 
 ### Deploy
 

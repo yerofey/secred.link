@@ -5,7 +5,13 @@ export const LEGACY_VERSION_PREFIX = '0';
 
 export const CRYPTO_V3_JSON_PREFIX = 'v3.j.';
 export const CRYPTO_V3_FILE_PREFIX = 'v3.f.';
-/** PBKDF2-HMAC-SHA256 iterations for content key derivation (OWASP-aligned). */
+/** Attachments + JSON bundle: one PBKDF2, HKDF subkeys — see `encryptSecretWithAttachmentV4` in crypto. */
+export const CRYPTO_V4_JSON_PREFIX = 'v4.j.';
+export const CRYPTO_V4_FILE_PREFIX = 'v4.f.';
+/**
+ * PBKDF2-HMAC-SHA256 iterations for content key derivation (OWASP-aligned).
+ * Changing this for new secrets requires a new envelope `i` / version and decrypt support; not done lightly.
+ */
 export const PBKDF2_ITERATIONS = 310_000;
 export const DEFAULT_STORAGE_VERSION = '1.0';
 export const DEFAULT_TEST_STRING = 'w4KPFgvgr4';

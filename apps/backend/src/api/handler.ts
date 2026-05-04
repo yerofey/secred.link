@@ -11,9 +11,11 @@ import {
 	importSecretSchema,
 	type MetricsCounter,
 	type MetricsResponse,
+	metricsSeedSchema,
 	parseAttachmentRoute,
 	parseSecretDeleteRoute,
 	parseSecretGetRoute,
+	type SeedMetricsResponse,
 	validateHash,
 } from '@secred/shared';
 import type { Env } from '../env';
@@ -159,7 +161,7 @@ export const handleApi = async (
 		return json(body);
 	}
 
-	if (request.method === 'GET' && path === ApiInner.metrics) {
+	if (path === ApiInner.metrics) {
 		if (!env.METRICS_TOKEN) {
 			return notFound();
 		}
@@ -169,17 +171,30 @@ export const handleApi = async (
 		) {
 			return unauthorized();
 		}
-		const start = Date.now();
-		const body: MetricsResponse = {
-			data: {
-				counters: await metricsStub(env).all(),
-			},
-			meta: {
-				elapsed: Date.now() - start,
-				timestamp: Math.round(Date.now() / 1000),
-			},
-		};
-		return json(body);
+		if (request.method === 'GET') {
+			const start = Date.now();
+			const body: MetricsResponse = {
+				data: {
+					counters: await metricsStub(env).all(),
+				},
+				meta: {
+					elapsed: Date.now() - start,
+					timestamp: Math.round(Date.now() / 1000),
+				},
+			};
+			return json(body);
+		}
+		if (request.method === 'POST') {
+			const parsed = metricsSeedSchema.safeParse(
+				await request.json().catch(() => null),
+			);
+			if (!parsed.success) {
+				return badRequest(parsed.error.flatten());
+			}
+			const counters = await metricsStub(env).seed(parsed.data);
+			const body: SeedMetricsResponse = { data: { counters } };
+			return json(body);
+		}
 	}
 
 	if (request.method === 'POST' && path === ApiInner.migrationSecrets) {

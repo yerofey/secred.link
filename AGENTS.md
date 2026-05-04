@@ -40,6 +40,7 @@ Wrangler root config: `wrangler.jsonc`. Worker main: `apps/backend/src/index.ts`
 
 ## Pitfalls
 
+- **Secret create latency**: End-to-end submit time is usually dominated by **browser PBKDF2** (`packages/shared` → `PBKDF2_ITERATIONS`). **With an attachment**, new creates use **v4** (`v4.j.` + `v4.f.`) — **one** PBKDF2 + HKDF subkeys; standalone `encryptAttachmentBytes` / old secrets may still be **v3** (separate `v3.f.`). The Worker API path is comparatively small; metrics use `waitUntil` and do not block the HTTP response.
 - Access keys in share URLs use fragment `#…`; encryption uses prefix `1` (current) vs legacy `0`; decrypt supports legacy CryptoJS blobs and modern `v3.j.` / `v3.f.` envelopes.
 - Changing API JSON field names requires updating Zod schemas and Worker handler together.
 - **`/api/*` rate limits**: enforced in `fetch-handler.ts` via `API_RATE_LIMITER` (`wrangler.jsonc` → `ratelimits`). Tuning requires editing both Wrangler config and `API_RATE_LIMIT_PERIOD_SEC` in `apps/backend/src/rate-limit.ts`.
