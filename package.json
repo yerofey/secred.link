@@ -9,6 +9,7 @@
 	],
 	"scripts": {
 		"dev": "bun run build:frontend && wrangler dev --env development",
+		"dev:frontend": "bun run --cwd apps/frontend dev",
 		"build": "bun run build:frontend && bun run typecheck",
 		"build:frontend": "bun run --cwd apps/frontend build",
 		"preview": "bun run build:frontend && wrangler dev --env development --local",
@@ -18,9 +19,7 @@
 		"check": "biome check --write .",
 		"test": "bun test",
 		"typecheck": "tsc --noEmit -p packages/shared/tsconfig.json && tsc --noEmit -p apps/backend/tsconfig.json && tsc --noEmit -p apps/frontend/tsconfig.json",
-		"cf:typegen": "wrangler types apps/backend/src/worker-configuration.d.ts",
-		"migrate:dry-run": "bun run scripts/migrate-mongo-to-cloudflare.ts --dry-run",
-		"migrate": "bun run scripts/migrate-mongo-to-cloudflare.ts"
+		"cf:typegen": "wrangler types apps/backend/src/worker-configuration.d.ts"
 	},
 	"dependencies": {
 		"@noble/hashes": "^2.2.0",
