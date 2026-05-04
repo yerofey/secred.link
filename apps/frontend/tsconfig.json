@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
+		"jsx": "react-jsx",
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"noEmit": true,
+		"paths": {
+			"@/*": ["src/*"],
+			"@secred/shared": ["../../packages/shared/src"]
+		},
+		"strict": true,
+		"target": "ES2022",
+		"types": ["vite/client"]
+	},
+	"include": ["src", "vite.config.ts"]
+}

@@ -1,12 +1,19 @@
 .DS_Store
 node_modules
 /dist
+/apps/frontend/dist
+/.wrangler
 _/
+migration-audit/
 
 # env files
 .env
 .env.local
 .env.*.local
+# Wrangler local overrides (see .dev.vars.example)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # Log files
 npm-debug.log*

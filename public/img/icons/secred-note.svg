@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Secred note">
+	<rect width="64" height="64" rx="18" fill="#2563eb" />
+	<path
+		fill="#f8fafc"
+		d="M35 18h-16.5a3.25 3.25 0 0 0-3.25 3.25v21.5A3.25 3.25 0 0 0 18.5 46h27a3.25 3.25 0 0 0 3.25-3.25V31.75z"
+	/>
+	<path fill="#bfdbfe" d="M35 18v13.75h13.75z" />
+	<path fill="#1e3a8a" d="M21 33h22v3.5H21zm0 7.5h16.5V44H21z" opacity=".82" />
+</svg>

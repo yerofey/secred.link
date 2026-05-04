@@ -1,0 +1,95 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	// Default config is used by `wrangler deploy` (production).
+	// Local dev uses `wrangler dev --env development` (see package.json scripts).
+	// Non-secret config: `vars` below. Secrets: `wrangler secret put <NAME>` (optional: `.dev.vars` for local only).
+	"name": "secred-link",
+	"main": "apps/backend/src/index.ts",
+	"compatibility_date": "2026-04-24",
+	"assets": {
+		"directory": "apps/frontend/dist",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/api/*"]
+	},
+	"r2_buckets": [
+		{
+			"binding": "ATTACHMENTS",
+			"bucket_name": "secred-attachments",
+			"preview_bucket_name": "secred-attachments-preview"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{ "name": "SECRETS", "class_name": "SecretObject" },
+			{ "name": "METRICS", "class_name": "MetricsObject" }
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["SecretObject", "MetricsObject"]
+		}
+	],
+	// Per-IP limit on /api/* (binding API must match apps/backend/src/env.ts). Period is 10s or 60s only.
+	"ratelimits": [
+		{
+			"name": "API_RATE_LIMITER",
+			"namespace_id": "1001",
+			"simple": { "limit": 120, "period": 60 }
+		}
+	],
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 0.1
+	},
+	"vars": {
+		"APP_URL": "https://secred.link",
+		"ENVIRONMENT": "production",
+		"VERSION_PREFIX": "1",
+		"TEST_STRING": "w4KPFgvgr4"
+	},
+	"env": {
+		// Bindings are not inherited — duplicate DO/R2/assets here so `wrangler dev --env development` works.
+		"development": {
+			"assets": {
+				"directory": "apps/frontend/dist",
+				"binding": "ASSETS",
+				"not_found_handling": "single-page-application",
+				"run_worker_first": ["/api/*"]
+			},
+			"r2_buckets": [
+				{
+					"binding": "ATTACHMENTS",
+					"bucket_name": "secred-attachments",
+					"preview_bucket_name": "secred-attachments-preview"
+				}
+			],
+			"durable_objects": {
+				"bindings": [
+					{ "name": "SECRETS", "class_name": "SecretObject" },
+					{ "name": "METRICS", "class_name": "MetricsObject" }
+				]
+			},
+			"migrations": [
+				{
+					"tag": "v1",
+					"new_sqlite_classes": ["SecretObject", "MetricsObject"]
+				}
+			],
+			"ratelimits": [
+				{
+					"name": "API_RATE_LIMITER",
+					"namespace_id": "1002",
+					"simple": { "limit": 120, "period": 60 }
+				}
+			],
+			"vars": {
+				"APP_URL": "http://127.0.0.1:8787",
+				"ENVIRONMENT": "development",
+				"VERSION_PREFIX": "1",
+				"TEST_STRING": "w4KPFgvgr4"
+			}
+		}
+	}
+}

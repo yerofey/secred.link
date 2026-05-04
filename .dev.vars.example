@@ -1,0 +1,9 @@
+# Local-only secrets (never commit real values). Copy the lines you need:
+#
+#   cp .dev.vars.example .dev.vars
+#
+# `wrangler dev` loads `.dev.vars` and merges with `wrangler.jsonc` `vars`.
+# With `wrangler dev --env development`, prefer `.dev.vars.development` for
+# environment-specific secrets (if that file exists, the generic `.dev.vars` is not loaded).
+#
+# MIGRATION_TOKEN=
