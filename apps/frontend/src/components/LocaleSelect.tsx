@@ -1,22 +1,28 @@
 import type { Locale } from '@secred/shared';
-import { Select } from '@/components/ui/select';
+import { Languages } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 export function LocaleSelect({ className }: { className?: string }) {
-	const { locale, setLocale } = useI18n();
+	const { locale, setLocale, t } = useI18n();
+
 	return (
-		<Select
-			aria-label="Language"
+		<label
 			className={cn(
-				'h-11 min-h-11 w-[84px] text-base md:h-10 md:min-h-10 md:w-[78px] md:text-sm',
+				'locale-switch relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full border border-border/70 bg-surface/80 text-muted-foreground shadow-sm transition-colors hover:bg-accent/70 hover:text-foreground focus-within:outline-none focus-within:ring-2 focus-within:ring-ring',
 				className,
 			)}
-			value={locale}
-			onChange={(event) => setLocale(event.target.value as Locale)}
 		>
-			<option value="en">EN</option>
-			<option value="ru">RU</option>
-		</Select>
+			<Languages className="pointer-events-none size-4 shrink-0" aria-hidden />
+			<select
+				className="absolute inset-0 cursor-pointer opacity-0"
+				aria-label={t('common.language')}
+				value={locale}
+				onChange={(event) => setLocale(event.target.value as Locale)}
+			>
+				<option value="en">{t('common.locale_en')}</option>
+				<option value="ru">{t('common.locale_ru')}</option>
+			</select>
+		</label>
 	);
 }

@@ -4,6 +4,11 @@
 		"not_found": "Not found",
 		"secret": "Secret",
 		"error": "Error",
+		"show_password": "Show password",
+		"hide_password": "Hide password",
+		"language": "Language",
+		"locale_en": "English",
+		"locale_ru": "Russian",
 		"time_units": {
 			"minute": { "one": "minute", "other": "minutes" },
 			"hour": { "one": "hour", "other": "hours" },

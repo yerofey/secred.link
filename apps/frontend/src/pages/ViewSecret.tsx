@@ -19,10 +19,10 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MarkdownContent } from '@/components/MarkdownContent';
+import { PasswordInput } from '@/components/PasswordInput';
 import { SecretAttachmentCard } from '@/components/SecretAttachmentCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
 	Tooltip,
 	TooltipContent,
@@ -483,10 +483,10 @@ export function ViewSecret() {
 							}}
 						>
 							<div className="flex flex-col gap-3 sm:flex-row">
-								<Input
-									type="password"
+								<PasswordInput
+									className="min-w-0 flex-1"
 									autoFocus
-									autoComplete="off"
+									autoComplete="current-password"
 									placeholder={t('view.passphrase')}
 									value={password}
 									aria-invalid={passwordStatus === 'invalid'}

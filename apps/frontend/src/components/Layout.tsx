@@ -50,6 +50,7 @@ export function Layout() {
 							</button>
 						</div>
 						<div className="flex items-center gap-2">
+							<LocaleSelect />
 							<Button
 								asChild
 								variant="outline"
@@ -76,15 +77,12 @@ export function Layout() {
 								{t('home.subtitle')}
 							</p>
 						</div>
-						<div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end">
-							<a
-								className="inline-flex min-h-11 min-w-[2.75rem] items-center justify-center rounded-full px-4 py-2 transition-colors hover:bg-accent/60 hover:text-foreground"
-								href="https://github.com/yerofey/secred.link"
-							>
-								GitHub
-							</a>
-							<LocaleSelect className="rounded-full md:text-xs" />
-						</div>
+						<a
+							className="inline-flex min-h-11 min-w-[2.75rem] items-center justify-center rounded-full px-4 py-2 transition-colors hover:bg-accent/60 hover:text-foreground"
+							href="https://github.com/yerofey/secred.link"
+						>
+							GitHub
+						</a>
 					</div>
 				</footer>
 			</div>

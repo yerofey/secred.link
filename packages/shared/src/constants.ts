@@ -22,6 +22,18 @@ export const MAX_PASSWORD_LENGTH = 64;
 export const ACCESS_KEY_LENGTH = 17;
 export const HASH_LENGTH = 64;
 
+/** Home UI presets — subset of `EXPIRATION_OPTIONS` values. */
+export const EXPIRATION_PRESETS = [
+	{ value: 60 * 60, count: 1, unit: 'hour' },
+	{ value: 24 * 60 * 60, count: 1, unit: 'day' },
+	{ value: 7 * 24 * 60 * 60, count: 1, unit: 'week' },
+	{
+		value: DEFAULT_SECRET_LIFETIME_SECONDS,
+		count: 1,
+		unit: 'month',
+	},
+] as const;
+
 export const EXPIRATION_OPTIONS = [
 	{ group: 'minutes', value: 5 * 60, count: 5, unit: 'minute' },
 	{ group: 'minutes', value: 10 * 60, count: 10, unit: 'minute' },

@@ -4,7 +4,9 @@ import { AlignLeft, PenLine } from 'lucide-react';
 import type { ReactNode, RefObject } from 'react';
 import { MarkdownEditorToolbar } from '@/components/MarkdownEditorToolbar';
 import { RichSecretEditor } from '@/components/RichSecretEditor';
+import { SegmentedControlIndicator } from '@/components/SegmentedControlIndicator';
 import { Textarea } from '@/components/ui/textarea';
+import { useSlidingSegmentIndicator } from '@/hooks/use-sliding-segment-indicator';
 import { cn } from '@/lib/utils';
 
 export type HomeEditorFieldProps = {
@@ -32,6 +34,10 @@ export function HomeEditorField({
 	t,
 	footer,
 }: HomeEditorFieldProps) {
+	const selectedIndex = rawEditing ? 1 : 0;
+	const { groupRef, segmentRefs, indicator, indicatorReady } =
+		useSlidingSegmentIndicator(selectedIndex);
+
 	return (
 		<fieldset className="secret-editor-field m-0 min-h-[min(24rem,64dvh)] min-w-0 overflow-hidden rounded-[1.6rem] border border-input/80 bg-surface-muted/55 p-0 focus-within:border-input focus-within:ring-2 focus-within:ring-ring/40">
 			<legend className="sr-only">{t('home.form.editor_legend')}</legend>
@@ -48,13 +54,21 @@ export function HomeEditorField({
 						disabled={apiDisabled}
 					/>
 				</div>
-				{/* biome-ignore lint/a11y/useSemanticElements: segmented control styled as div */}
+				{/* biome-ignore lint/a11y/useSemanticElements: segmented control */}
 				<div
+					ref={groupRef}
 					className="editor-mode-switch"
 					role="group"
 					aria-label={t('home.form.editor_mode_label')}
 				>
+					<SegmentedControlIndicator
+						indicator={indicator}
+						indicatorReady={indicatorReady}
+					/>
 					<button
+						ref={(element) => {
+							segmentRefs.current[0] = element;
+						}}
 						type="button"
 						disabled={apiDisabled}
 						aria-pressed={!rawEditing}
@@ -72,6 +86,9 @@ export function HomeEditorField({
 						/>
 					</button>
 					<button
+						ref={(element) => {
+							segmentRefs.current[1] = element;
+						}}
 						type="button"
 						disabled={apiDisabled}
 						aria-pressed={rawEditing}

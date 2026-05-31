@@ -2,18 +2,16 @@ import {
 	DEFAULT_SECRET_LIFETIME_SECONDS,
 	DEFAULT_TEST_STRING,
 	DEFAULT_VERSION_PREFIX,
-	EXPIRATION_OPTIONS,
+	EXPIRATION_PRESETS,
 	MAX_ATTACHMENT_BYTES,
 	MAX_PASSWORD_LENGTH,
 	MAX_SECRET_LENGTH,
 } from '@secred/shared';
 import type { Editor } from '@tiptap/core';
 import {
-	ChevronDown,
 	FileText,
 	Flame,
 	KeyRound,
-	LockKeyhole,
 	Paperclip,
 	PlusCircle,
 	X,
@@ -21,10 +19,9 @@ import {
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExpirationSelect } from '@/components/ExpirationSelect';
+import { PasswordInput } from '@/components/PasswordInput';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { getPasswordStrength } from '@/lib/passwordStrength';
@@ -67,10 +64,8 @@ export function Home() {
 	>('idle');
 	const submitInFlightRef = useRef(false);
 	const [attachment, setAttachment] = useState<File | null>(null);
-	const [optionalSettingsOpen, setOptionalSettingsOpen] = useState(false);
 	const [richEditor, setRichEditor] = useState<Editor | null>(null);
 	const attachmentInputRef = useRef<HTMLInputElement>(null);
-	const isWideHomeLayout = useMediaQuery('(min-width: 1280px)');
 
 	useEffect(() => {
 		api
@@ -157,9 +152,9 @@ export function Home() {
 
 	const isAtMaxLength = content.length >= MAX_SECRET_LENGTH;
 	const isNearMaxLength = content.length >= Math.floor(MAX_SECRET_LENGTH * 0.9);
-	const selectedLifetime = EXPIRATION_OPTIONS.find(
-		(option) => option.value === lifetime,
-	);
+	const selectedLifetime =
+		EXPIRATION_PRESETS.find((option) => option.value === lifetime) ??
+		EXPIRATION_PRESETS[EXPIRATION_PRESETS.length - 1];
 	const expirationLabel = selectedLifetime
 		? `${selectedLifetime.count} ${timeUnit(
 				selectedLifetime.unit,
@@ -316,55 +311,7 @@ export function Home() {
 					</div>
 					<div className="side-rail lg:sticky lg:top-6 lg:self-start xl:top-8">
 						<div className="rail-card xl:p-5">
-							{isWideHomeLayout ? (
-								<div className="mb-4 flex items-center gap-3 border-b border-border/45 pb-3">
-									<LockKeyhole
-										className="size-4 shrink-0 text-primary"
-										aria-hidden
-									/>
-									<h2
-										id="optional-settings-heading"
-										className="section-label m-0 flex-1 text-left"
-									>
-										{t('home.form.optional')}
-									</h2>
-								</div>
-							) : (
-								<button
-									type="button"
-									className={cn(
-										'rail-card-toggle',
-										optionalSettingsOpen && 'rail-card-toggle--open',
-									)}
-									onClick={() => setOptionalSettingsOpen((open) => !open)}
-									aria-expanded={optionalSettingsOpen}
-									aria-controls="optional-settings-panel"
-								>
-									<LockKeyhole
-										className="size-4 shrink-0 text-primary"
-										aria-hidden
-									/>
-									<span
-										id="optional-settings-heading"
-										className="section-label min-w-0 flex-1 text-left"
-									>
-										{t('home.form.optional')}
-									</span>
-									<ChevronDown
-										className={cn(
-											'size-5 shrink-0 text-muted-foreground transition-transform duration-200',
-											optionalSettingsOpen && 'rotate-180',
-										)}
-										aria-hidden
-									/>
-								</button>
-							)}
-							<section
-								id="optional-settings-panel"
-								className="setup-controls"
-								aria-labelledby="optional-settings-heading"
-								hidden={!optionalSettingsOpen && !isWideHomeLayout}
-							>
+							<section className="setup-controls">
 								<div className="setup-field">
 									<div className="setup-field-label-row">
 										<KeyRound className="size-4 shrink-0" aria-hidden />
@@ -375,11 +322,10 @@ export function Home() {
 											{t('home.form.password')}
 										</Label>
 									</div>
-									<Input
+									<PasswordInput
 										id="password"
-										type="text"
 										placeholder={t('home.form.passphrase')}
-										autoComplete="off"
+										autoComplete="new-password"
 										maxLength={MAX_PASSWORD_LENGTH}
 										value={password}
 										onChange={(event) => setPassword(event.target.value)}
