@@ -173,10 +173,14 @@ To run your own Worker on Cloudflare (separate account, buckets, and rate-limit 
 
 ---
 
+## Contributing
+
+Issues and pull requests are welcome on [GitHub](https://github.com/yerofey/secred.link). For larger changes, open an issue first so we can align on approach.
+
 ## AI / editor assistants
 
-Repository-specific hints for tools and agents live in **AGENTS.md** (layout, commands, conventions).
+Repository-specific hints for tools and agents live in **[AGENTS.md](./AGENTS.md)** (layout, commands, conventions).
 
-## License / project
+## License
 
-Private project (`"private": true` in `package.json`). Adjust this section if you open-source the repo.
+Released under the [MIT License](./LICENSE). You may run, modify, and self-host your own deployment; see **[SELF_HOSTING.md](./SELF_HOSTING.md)** for Cloudflare setup.
