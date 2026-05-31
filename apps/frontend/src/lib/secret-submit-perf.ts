@@ -1,4 +1,4 @@
-/** Dev-only Performance API timings for secret submit (see docs/plans/new-secret-submit-performance-plan.md). */
+/** Dev-only Performance API timings for secret submit. */
 export async function devMeasureAsync<T>(
 	name: string,
 	run: () => Promise<T>,

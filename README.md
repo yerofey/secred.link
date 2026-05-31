@@ -159,6 +159,10 @@ wrangler deploy
 
 (`bun run deploy` runs a frontend build then `wrangler deploy` with the default environment.)
 
+### Self-hosting
+
+To run your own Worker on Cloudflare (separate account, buckets, and rate-limit namespace), follow **[SELF_HOSTING.md](./SELF_HOSTING.md)**. Before deploy, run `bun run selfhost:check` to catch common `wrangler.jsonc` mistakes.
+
 ---
 
 ## Security model (short)

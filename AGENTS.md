@@ -38,6 +38,10 @@ Wrangler root config: `wrangler.jsonc`. Worker main: `apps/backend/src/index.ts`
 
 - Optional: `MIGRATION_TOKEN`, `METRICS_TOKEN` — see root `README.md`.
 
+## Self-hosting
+
+Operators deploy to their own Cloudflare account (Worker + DO + R2 + rate limits). Guide: **`SELF_HOSTING.md`**. Config template: `wrangler.selfhost.jsonc.example`. Static preflight: `bun run selfhost:check` (upstream maintainers: `ALLOW_PROD_NAMES=1`).
+
 ## Pitfalls
 
 - **Secret create latency**: End-to-end submit time is usually dominated by **browser PBKDF2** (`packages/shared` → `PBKDF2_ITERATIONS`). **With an attachment**, new creates use **v4** (`v4.j.` + `v4.f.`) — **one** PBKDF2 + HKDF subkeys; standalone `encryptAttachmentBytes` / old secrets may still be **v3** (separate `v3.f.`). The Worker API path is comparatively small; metrics use `waitUntil` and do not block the HTTP response.

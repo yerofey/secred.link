@@ -1,6 +1,14 @@
 {
 	"compilerOptions": {
+		"noEmit": true,
 		"strict": true,
 		"target": "ES2022"
-	}
+	},
+	"exclude": [
+		"node_modules",
+		"apps",
+		"packages",
+		"tests",
+		"scripts"
+	]
 }
