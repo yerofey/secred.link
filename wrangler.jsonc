@@ -6,6 +6,9 @@
 	"name": "secred-link",
 	"main": "apps/backend/src/index.ts",
 	"compatibility_date": "2026-04-24",
+	"placement": {
+		"mode": "smart"
+	},
 	"assets": {
 		"directory": "apps/frontend/dist",
 		"binding": "ASSETS",
