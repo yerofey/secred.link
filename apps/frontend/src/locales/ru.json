@@ -9,6 +9,9 @@
 		"language": "Язык",
 		"locale_en": "English",
 		"locale_ru": "Русский",
+		"skip_to_content": "Перейти к основному содержимому",
+		"toggle_theme": "Переключить тему",
+		"saved_secrets": "Сохранённые секреты",
 		"time_units": {
 			"minute": { "one": "минуту", "few": "минуты", "many": "минут" },
 			"hour": { "one": "час", "few": "часа", "many": "часов" },
@@ -16,6 +19,13 @@
 			"week": { "one": "неделю", "few": "недели", "many": "недель" },
 			"month": { "one": "месяц", "few": "месяца", "many": "месяцев" }
 		}
+	},
+	"meta": {
+		"home_title": "Создать секрет — Secred",
+		"manage_title": "Управление секретом — Secred",
+		"storage_title": "Сохранённые секреты — Secred",
+		"view_title": "Просмотр секрета — Secred",
+		"not_found_title": "Страница не найдена — Secred"
 	},
 	"expiration": {
 		"minutes": "Минуты",
@@ -25,7 +35,8 @@
 		"months": "Месяцы"
 	},
 	"home": {
-		"title": "Засекретить данные",
+		"title": "Поделитесь секретом безопасно.",
+		"reassurance": "Шифрование происходит в вашем браузере. Сервер хранит только шифротекст.",
 		"subtitle": "Держи важную информацию вне своих чатов и заметок",
 		"api": {
 			"unavailable": "Наш API сервис временно недоступен. Пожалуйста, попробуйте позже."
@@ -43,6 +54,7 @@
 			"toolbar_numbered": "Нумерованный список",
 			"toolbar_quote": "Цитата",
 			"toolbar_fence": "Блок кода",
+			"toolbar_more": "Ещё форматирование",
 			"source_label": "Исходный Markdown",
 			"preview_label": "Как будет выглядеть",
 			"editor_mode_label": "Режим ввода",
@@ -70,6 +82,15 @@
 			"phase_encrypting": "Шифрование",
 			"phase_saving": "Сохранение",
 			"phase_uploading_file": "Загрузка файла",
+			"checking_service": "Проверяем сервис",
+			"retry_service": "Повторить проверку",
+			"submit_failed": "Не удалось создать секрет. Введённые данные остались на месте.",
+			"retry_submit": "Попробовать снова",
+			"options_summary": "Настройки защиты",
+			"summary_password": "Пароль",
+			"summary_burn": "Сжигание",
+			"summary_on": "вкл",
+			"summary_off": "выкл",
 			"submit_empty": "Добавьте текст или файл",
 			"submit_ready": "Готово к шифрованию",
 			"submit_file_too_large": "Файл слишком большой",
@@ -106,6 +127,7 @@
 		"badge_password": "Пароль",
 		"badge_burn": "Самоуничтожение",
 		"badge_attachment": "Вложение",
+		"not_found_headline": "Секрет недоступен на этом устройстве",
 		"not_found": "Такого секрета нет в памяти этого браузера.",
 		"not_found_cta": "Создать новый секрет"
 	},
@@ -120,6 +142,11 @@
 		"attachment": "вложение",
 		"attachments": "вложения",
 		"clean": "Очистить кэш устройства"
+	},
+	"not_found_page": {
+		"title": "Страница не найдена",
+		"description": "По этому адресу нет страницы Secred.",
+		"cta": "Создать секрет"
 	},
 	"view": {
 		"burned": "Удалено",

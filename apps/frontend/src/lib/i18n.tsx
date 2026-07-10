@@ -6,11 +6,11 @@ import {
 	useMemo,
 	useState,
 } from 'react';
+import { supportedLocales } from '@/lib/locale-display';
 import en from '../locales/en.json';
 import ru from '../locales/ru.json';
 
 const dictionaries = { en, ru } as const;
-const locales: Locale[] = ['en', 'ru'];
 
 type I18nContextValue = {
 	locale: Locale;
@@ -27,7 +27,9 @@ const detectLocale = (): Locale => {
 		return saved;
 	}
 	const browser = navigator.language.slice(0, 2);
-	return locales.includes(browser as Locale) ? (browser as Locale) : 'en';
+	return supportedLocales.includes(browser as Locale)
+		? (browser as Locale)
+		: 'en';
 };
 
 const readPath = (source: unknown, path: string) =>

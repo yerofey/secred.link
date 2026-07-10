@@ -1,6 +1,5 @@
 import { MAX_SECRET_LENGTH } from '@secred/shared';
 import type { Editor } from '@tiptap/core';
-import { AlignLeft, PenLine } from 'lucide-react';
 import type { ReactNode, RefObject } from 'react';
 import { MarkdownEditorToolbar } from '@/components/MarkdownEditorToolbar';
 import { RichSecretEditor } from '@/components/RichSecretEditor';
@@ -17,7 +16,6 @@ export type HomeEditorFieldProps = {
 	richEditor: Editor | null;
 	onRichEditor: (editor: Editor | null) => void;
 	textareaRef: RefObject<HTMLTextAreaElement | null>;
-	apiDisabled: boolean;
 	t: (key: string) => string;
 	footer?: ReactNode;
 };
@@ -30,7 +28,6 @@ export function HomeEditorField({
 	richEditor,
 	onRichEditor,
 	textareaRef,
-	apiDisabled,
 	t,
 	footer,
 }: HomeEditorFieldProps) {
@@ -39,7 +36,7 @@ export function HomeEditorField({
 		useSlidingSegmentIndicator(selectedIndex);
 
 	return (
-		<fieldset className="secret-editor-field m-0 min-h-[min(24rem,64dvh)] min-w-0 overflow-hidden rounded-[1.6rem] border border-input/80 bg-surface-muted/55 p-0 focus-within:border-input focus-within:ring-2 focus-within:ring-ring/40">
+		<fieldset className="secret-editor-field m-0 min-h-0 min-w-0 flex-1 overflow-hidden rounded-[1.6rem] border border-input/80 bg-surface-muted/55 p-0 focus-within:border-input focus-within:ring-2 focus-within:ring-ring/40">
 			<legend className="sr-only">{t('home.form.editor_legend')}</legend>
 			<div className="secret-editor-field__chrome">
 				<div className="secret-editor-field__toolbar">
@@ -51,7 +48,6 @@ export function HomeEditorField({
 						value={content}
 						onChange={onContentChange}
 						maxLength={MAX_SECRET_LENGTH}
-						disabled={apiDisabled}
 					/>
 				</div>
 				{/* biome-ignore lint/a11y/useSemanticElements: segmented control */}
@@ -70,7 +66,6 @@ export function HomeEditorField({
 							segmentRefs.current[0] = element;
 						}}
 						type="button"
-						disabled={apiDisabled}
 						aria-pressed={!rawEditing}
 						aria-label={t('home.form.mode_visual')}
 						onClick={() => onRawEditingChange(false)}
@@ -79,18 +74,13 @@ export function HomeEditorField({
 							!rawEditing && 'editor-mode-switch__segment--active',
 						)}
 					>
-						<PenLine
-							className="size-[15px] shrink-0 md:size-4"
-							strokeWidth={1.7}
-							aria-hidden
-						/>
+						{t('home.form.mode_visual')}
 					</button>
 					<button
 						ref={(element) => {
 							segmentRefs.current[1] = element;
 						}}
 						type="button"
-						disabled={apiDisabled}
 						aria-pressed={rawEditing}
 						aria-label={t('home.form.mode_plain')}
 						onClick={() => onRawEditingChange(true)}
@@ -99,11 +89,7 @@ export function HomeEditorField({
 							rawEditing && 'editor-mode-switch__segment--active',
 						)}
 					>
-						<AlignLeft
-							className="size-[15px] shrink-0 md:size-4"
-							strokeWidth={1.7}
-							aria-hidden
-						/>
+						{t('home.form.mode_plain')}
 					</button>
 				</div>
 			</div>
@@ -112,7 +98,7 @@ export function HomeEditorField({
 					ref={textareaRef}
 					id="secret-body"
 					maxLength={MAX_SECRET_LENGTH}
-					className="min-h-[min(48dvh,20rem)] resize-y rounded-none border-0 bg-transparent px-4 py-4 shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 md:min-h-[20rem] md:px-5 md:py-5"
+					className="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent px-4 py-4 shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 md:px-5 md:py-5"
 					aria-label={t('home.form.insert')}
 					placeholder={t('home.form.insert')}
 					autoCorrect="off"
@@ -125,7 +111,6 @@ export function HomeEditorField({
 					onChange={onContentChange}
 					placeholder={t('home.form.insert')}
 					maxLength={MAX_SECRET_LENGTH}
-					disabled={apiDisabled}
 					onEditor={onRichEditor}
 				/>
 			)}

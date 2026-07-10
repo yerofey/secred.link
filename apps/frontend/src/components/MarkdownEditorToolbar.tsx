@@ -3,6 +3,7 @@ import { useEditorState } from '@tiptap/react';
 import {
 	Bold,
 	Code2,
+	Ellipsis,
 	FileCode2,
 	Heading2,
 	Italic,
@@ -12,8 +13,13 @@ import {
 	Quote,
 	Strikethrough,
 } from 'lucide-react';
-import type { RefObject } from 'react';
+import { type RefObject, useRef } from 'react';
 import { useI18n } from '@/lib/i18n';
+import {
+	DESKTOP_TOOLBAR_GROUPS,
+	MOBILE_OVERFLOW_ACTIONS,
+	MOBILE_PRIMARY_ACTIONS,
+} from '@/lib/markdown-toolbar-actions';
 import {
 	applyMarkdownInsert,
 	type MarkdownInsertKind,
@@ -141,14 +147,6 @@ const ACTION_MAP = Object.fromEntries(
 	{ kind: MarkdownInsertKind; icon: typeof Bold; labelKey: string }
 >;
 
-/** Visual groups: inline marks · links/structure · lists · blocks */
-const TOOLBAR_GROUPS: MarkdownInsertKind[][] = [
-	['bold', 'italic', 'strike', 'code'],
-	['link', 'h2'],
-	['bullet', 'ordered'],
-	['quote', 'fence'],
-];
-
 export function MarkdownEditorToolbar({
 	textareaRef,
 	richEditor,
@@ -160,6 +158,8 @@ export function MarkdownEditorToolbar({
 	embedded = false,
 }: MarkdownEditorToolbarProps) {
 	const { t } = useI18n();
+	const overflowDetailsRef = useRef<HTMLDetailsElement>(null);
+	const overflowSummaryRef = useRef<HTMLElement>(null);
 
 	const richToolbarActive = useEditorState({
 		editor: variant === 'rich' ? richEditor : null,
@@ -220,48 +220,88 @@ export function MarkdownEditorToolbar({
 		});
 	};
 
+	const closeOverflow = () => {
+		if (overflowDetailsRef.current) {
+			overflowDetailsRef.current.open = false;
+		}
+		const focusSummary = () => overflowSummaryRef.current?.focus();
+		focusSummary();
+		requestAnimationFrame(focusSummary);
+	};
+
+	const renderAction = (
+		kind: MarkdownInsertKind,
+		options?: { afterApply?: () => void },
+	) => {
+		const { icon: Icon, labelKey } = ACTION_MAP[kind];
+		const isOn = variant === 'rich' && activeMap[ACTIVE_BY_KIND[kind]];
+		return (
+			<button
+				key={kind}
+				type="button"
+				disabled={disabled}
+				className="markdown-toolbar__btn"
+				data-active={isOn ? 'true' : 'false'}
+				aria-pressed={variant === 'rich' ? Boolean(isOn) : undefined}
+				aria-label={t(`home.form.${labelKey}`)}
+				title={t(`home.form.${labelKey}`)}
+				onClick={() => {
+					apply(kind);
+					options?.afterApply?.();
+				}}
+			>
+				<Icon
+					className="size-[15px] md:size-4"
+					strokeWidth={isOn ? 2.35 : 1.7}
+					aria-hidden
+				/>
+			</button>
+		);
+	};
+
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: formatting controls use normal Tab navigation
 		<div
 			className={cn(
 				'markdown-toolbar',
 				embedded && 'markdown-toolbar--embedded',
 			)}
-			role="toolbar"
+			role="group"
 			aria-label={t('home.form.toolbar_label')}
 		>
-			{TOOLBAR_GROUPS.map((group, groupIndex) => (
-				<div
-					key={`toolbar-g-${groupIndex}`}
-					className="markdown-toolbar__group"
-				>
-					{groupIndex > 0 ? (
-						<span className="markdown-toolbar__divider" aria-hidden />
-					) : null}
-					{group.map((kind) => {
-						const { icon: Icon, labelKey } = ACTION_MAP[kind];
-						const isOn = variant === 'rich' && activeMap[ACTIVE_BY_KIND[kind]];
-						return (
-							<button
-								key={kind}
-								type="button"
-								disabled={disabled}
-								className="markdown-toolbar__btn"
-								data-active={isOn ? 'true' : 'false'}
-								aria-pressed={variant === 'rich' ? Boolean(isOn) : undefined}
-								aria-label={t(`home.form.${labelKey}`)}
-								title={t(`home.form.${labelKey}`)}
-								onClick={() => apply(kind)}
-							>
-								<Icon
-									className="size-[15px] md:size-4"
-									strokeWidth={isOn ? 2.35 : 1.7}
-									aria-hidden
-								/>
-							</button>
-						);
-					})}
+			<div className="markdown-toolbar__compact">
+				<div className="markdown-toolbar__group">
+					{MOBILE_PRIMARY_ACTIONS.map((kind) => renderAction(kind))}
 				</div>
-			))}
+				<details ref={overflowDetailsRef} className="markdown-toolbar__more">
+					<summary
+						ref={overflowSummaryRef}
+						className="markdown-toolbar__more-summary"
+						aria-label={t('home.form.toolbar_more')}
+						title={t('home.form.toolbar_more')}
+					>
+						<Ellipsis className="size-4" strokeWidth={1.7} aria-hidden />
+					</summary>
+					<div className="markdown-toolbar__more-menu">
+						{MOBILE_OVERFLOW_ACTIONS.map((kind) =>
+							renderAction(kind, { afterApply: closeOverflow }),
+						)}
+					</div>
+				</details>
+			</div>
+			<div className="markdown-toolbar__full">
+				{DESKTOP_TOOLBAR_GROUPS.map((group, groupIndex) => (
+					<div
+						key={`toolbar-g-${groupIndex}`}
+						className="markdown-toolbar__group"
+					>
+						{groupIndex > 0 ? (
+							<span className="markdown-toolbar__divider" aria-hidden />
+						) : null}
+						{group.map((kind) => renderAction(kind))}
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }

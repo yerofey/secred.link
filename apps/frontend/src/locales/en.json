@@ -8,7 +8,10 @@
 		"hide_password": "Hide password",
 		"language": "Language",
 		"locale_en": "English",
-		"locale_ru": "Russian",
+		"locale_ru": "Русский",
+		"skip_to_content": "Skip to main content",
+		"toggle_theme": "Toggle theme",
+		"saved_secrets": "Saved secrets",
 		"time_units": {
 			"minute": { "one": "minute", "other": "minutes" },
 			"hour": { "one": "hour", "other": "hours" },
@@ -16,6 +19,13 @@
 			"week": { "one": "week", "other": "weeks" },
 			"month": { "one": "month", "other": "months" }
 		}
+	},
+	"meta": {
+		"home_title": "Create a secret — Secred",
+		"manage_title": "Manage secret — Secred",
+		"storage_title": "Saved secrets — Secred",
+		"view_title": "View secret — Secred",
+		"not_found_title": "Page not found — Secred"
 	},
 	"expiration": {
 		"minutes": "Minutes",
@@ -25,7 +35,8 @@
 		"months": "Months"
 	},
 	"home": {
-		"title": "Secure any Data",
+		"title": "Share a secret securely.",
+		"reassurance": "Encrypted in your browser. The server only stores ciphertext.",
 		"subtitle": "Keep sensitive info out of your chats and notes",
 		"api": {
 			"unavailable": "API service is currently unavailable. Please try again later."
@@ -43,11 +54,12 @@
 			"toolbar_numbered": "Numbered list",
 			"toolbar_quote": "Quote",
 			"toolbar_fence": "Code block",
+			"toolbar_more": "More formatting",
 			"source_label": "Markdown source",
 			"preview_label": "Formatted preview",
 			"editor_mode_label": "Writing mode",
 			"mode_visual": "Visual",
-			"mode_plain": "Plain text",
+			"mode_plain": "Text",
 			"insert": "Write your secret — Markdown supported",
 			"preview": "Preview",
 			"edit": "Edit",
@@ -70,6 +82,15 @@
 			"phase_encrypting": "Encrypting",
 			"phase_saving": "Saving",
 			"phase_uploading_file": "Uploading file",
+			"checking_service": "Checking service",
+			"retry_service": "Retry service",
+			"submit_failed": "We could not create the secret. Your input is still here.",
+			"retry_submit": "Try again",
+			"options_summary": "Protection settings",
+			"summary_password": "Password",
+			"summary_burn": "Burn",
+			"summary_on": "on",
+			"summary_off": "off",
 			"submit_empty": "Add a message or attach a file",
 			"submit_ready": "Ready to encrypt",
 			"submit_file_too_large": "File is too large",
@@ -106,6 +127,7 @@
 		"badge_password": "Password",
 		"badge_burn": "Burn after read",
 		"badge_attachment": "Attachment",
+		"not_found_headline": "Secret unavailable on this device",
 		"not_found": "We could not find that secret in this browser.",
 		"not_found_cta": "Create a new secret"
 	},
@@ -120,6 +142,11 @@
 		"attachment": "attachment",
 		"attachments": "attachments",
 		"clean": "Clear device cache"
+	},
+	"not_found_page": {
+		"title": "Page not found",
+		"description": "That address does not point to a page in Secred.",
+		"cta": "Create a secret"
 	},
 	"view": {
 		"burned": "Burned",

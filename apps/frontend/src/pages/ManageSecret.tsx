@@ -14,6 +14,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/lib/i18n';
+import {
+	getCurrentManageSecret,
+	getManageIntroKeys,
+	type ResolvedManageState,
+} from '@/lib/manage-page-state';
 import { readLocalSecret } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 
@@ -21,14 +26,19 @@ export function ManageSecret() {
 	const { t } = useI18n();
 	const location = useLocation();
 	const sid = location.hash.slice(1);
-	const [secret, setSecret] = useState<LocalSecret | null>(null);
+	const [resolvedState, setResolvedState] =
+		useState<ResolvedManageState<LocalSecret> | null>(null);
 	const [isCopied, setIsCopied] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		setSecret(sid ? readLocalSecret(sid) : null);
-		setIsLoading(false);
+		setResolvedState({
+			sid,
+			secret: sid ? readLocalSecret(sid) : null,
+		});
+		setIsCopied(false);
 	}, [sid]);
+
+	const secret = getCurrentManageSecret(sid, resolvedState);
 
 	const shareLink = secret?.keys.accessKey
 		? `${window.location.origin}/view#${secret.keys.accessKey}`
@@ -47,7 +57,7 @@ export function ManageSecret() {
 		setIsCopied(true);
 	};
 
-	if (isLoading) {
+	if (secret === undefined) {
 		return (
 			<div className="page-shell mx-auto max-w-3xl pt-10 text-center text-sm text-muted-foreground">
 				{t('common.loading')}...
@@ -55,12 +65,14 @@ export function ManageSecret() {
 		);
 	}
 
+	const introKeys = getManageIntroKeys(secret !== null);
+
 	return (
 		<div className="page-shell mx-auto max-w-3xl pb-10">
 			<div className="page-intro mx-auto max-w-xl pt-2 sm:pt-6">
 				<span className="page-kicker">Secred</span>
-				<h1 className="page-title">{t('manage.headline')}</h1>
-				<p className="page-subtitle">{t('manage.subtitle')}</p>
+				<h1 className="page-title">{t(introKeys.titleKey)}</h1>
+				<p className="page-subtitle">{t(introKeys.subtitleKey)}</p>
 			</div>
 			{secret ? (
 				<Card
@@ -157,7 +169,6 @@ export function ManageSecret() {
 			) : (
 				<Card className="mx-auto w-full max-w-xl rounded-[1.75rem] border-dashed">
 					<CardContent className="grid gap-6 py-12 text-center">
-						<p className="text-muted-foreground">{t('manage.not_found')}</p>
 						<div className="flex flex-wrap justify-center gap-3">
 							<Button asChild>
 								<Link to="/">{t('manage.not_found_cta')}</Link>

@@ -1,27 +1,20 @@
-import type { LocalSecret } from '@secred/shared';
 import { Clock3, Inbox, Lock, Paperclip, Trash2, Unlock } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useI18n } from '@/lib/i18n';
 import { secretStorage } from '@/lib/storage';
+import { loadStorageItems } from '@/lib/storage-page-state';
 import { relativeTime } from '@/lib/time';
 
 export function Storage() {
 	const { t } = useI18n();
-	const [items, setItems] = useState<LocalSecret[]>([]);
+	const [items, setItems] = useState(() => loadStorageItems(secretStorage()));
 
 	const refresh = () => {
-		const values = Object.values(
-			secretStorage().getAllItems<LocalSecret>('secret_'),
-		).sort((a, b) => b.timestamp - a.timestamp);
-		setItems(values);
+		setItems(loadStorageItems(secretStorage()));
 	};
-
-	useEffect(() => {
-		refresh();
-	}, []);
 
 	const clear = () => {
 		secretStorage().removeAllItems('secret_');
@@ -33,7 +26,9 @@ export function Storage() {
 			<div className="page-intro mx-auto max-w-2xl pt-2 sm:pt-6">
 				<span className="page-kicker">Secred</span>
 				<h1 className="page-title">{t('storage.title')}</h1>
-				<p className="page-subtitle">{t('storage.on_device')}.</p>
+				{items.length > 0 ? (
+					<p className="page-subtitle">{t('storage.on_device')}.</p>
+				) : null}
 			</div>
 			{items.length > 0 ? (
 				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -111,6 +106,9 @@ export function Storage() {
 									{t('storage.empty')}
 								</p>
 								<p className="text-sm leading-relaxed text-muted-foreground">
+									{t('storage.on_device')}.
+								</p>
+								<p className="text-sm leading-relaxed text-muted-foreground">
 									{t('storage.empty_hint')}
 								</p>
 							</div>
@@ -119,16 +117,8 @@ export function Storage() {
 							</Button>
 						</CardContent>
 					</Card>
-					<p className="text-center text-sm text-muted-foreground">
-						{t('storage.on_device')}.
-					</p>
 				</div>
 			)}
-			{items.length > 0 ? (
-				<p className="text-center text-sm text-muted-foreground">
-					{t('storage.on_device')}.
-				</p>
-			) : null}
 			{items.length > 0 ? (
 				<div className="flex justify-center">
 					<Button type="button" variant="outline" size="sm" onClick={clear}>

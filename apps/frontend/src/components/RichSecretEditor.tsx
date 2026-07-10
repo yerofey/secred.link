@@ -41,9 +41,11 @@ export function RichSecretEditor({
 	const lastEmitted = useRef(value);
 	const onChangeRef = useRef(onChange);
 	const maxLengthRef = useRef(maxLength);
+	const placeholderRef = useRef(placeholder);
 
 	onChangeRef.current = onChange;
 	maxLengthRef.current = maxLength;
+	placeholderRef.current = placeholder;
 
 	const editor = useEditor(
 		{
@@ -67,7 +69,7 @@ export function RichSecretEditor({
 					},
 				}),
 				Placeholder.configure({
-					placeholder,
+					placeholder: () => placeholderRef.current,
 					emptyEditorClass: 'is-editor-empty',
 				}),
 			],
@@ -75,7 +77,7 @@ export function RichSecretEditor({
 			editorProps: {
 				attributes: {
 					class: cn(
-						'rich-secret-prose min-h-[min(48dvh,20rem)] w-full px-4 py-4 text-base leading-relaxed text-foreground outline-none md:min-h-[20rem] md:px-5 md:py-5 md:text-sm',
+						'rich-secret-prose min-h-0 flex-1 overflow-y-auto w-full px-4 py-4 text-base leading-relaxed text-foreground outline-none md:px-5 md:py-5 md:text-sm',
 						'[&_a]:break-all [&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground/40 [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground',
 						'[&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
 						'[&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold',
@@ -96,6 +98,13 @@ export function RichSecretEditor({
 		},
 		[],
 	);
+
+	useEffect(() => {
+		if (!editor || editor.isDestroyed) {
+			return;
+		}
+		editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
+	}, [editor, placeholder]);
 
 	useEffect(() => {
 		if (!editor || editor.isDestroyed) {
@@ -126,7 +135,7 @@ export function RichSecretEditor({
 		return (
 			<div
 				className={cn(
-					'min-h-[min(48dvh,20rem)] w-full animate-pulse rounded-b-[inherit] bg-muted/30',
+					'min-h-0 flex-1 overflow-y-auto w-full animate-pulse rounded-b-[inherit] bg-muted/30',
 					className,
 				)}
 				aria-hidden

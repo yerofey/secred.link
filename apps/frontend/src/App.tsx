@@ -12,6 +12,7 @@ const ManageSecret = lazyPage(
 	() => import('@/pages/ManageSecret'),
 	'ManageSecret',
 );
+const NotFound = lazyPage(() => import('@/pages/NotFound'), 'NotFound');
 const Storage = lazyPage(() => import('@/pages/Storage'), 'Storage');
 const ViewSecret = lazyPage(() => import('@/pages/ViewSecret'), 'ViewSecret');
 
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
 			{ path: 'manage', element: <ManageSecret /> },
 			{ path: 'storage', element: <Storage /> },
 			{ path: 'view', element: <ViewSecret /> },
+			{ path: '*', element: <NotFound /> },
 		],
 	},
 ]);

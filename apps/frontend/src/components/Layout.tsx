@@ -1,20 +1,30 @@
 import { Bookmark, Moon, Sun } from 'lucide-react';
-import { Suspense } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { LocaleSelect } from '@/components/LocaleSelect';
 import { RoutePageFallback } from '@/components/RoutePageFallback';
 import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useTheme } from '@/hooks/use-theme';
+import { syncDocumentMeta } from '@/lib/document-meta';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 export function Layout() {
 	const { theme, setTheme } = useTheme();
-	const { t } = useI18n();
+	const { locale, t } = useI18n();
+	const { pathname } = useLocation();
+
+	useEffect(() => {
+		syncDocumentMeta(document, pathname, locale, t);
+	}, [locale, pathname, t]);
 
 	return (
 		<TooltipProvider delayDuration={350}>
 			<div className="app-shell flex min-h-dvh flex-col">
+				<a className="skip-link" href="#main-content">
+					{t('common.skip_to_content')}
+				</a>
 				<header className="px-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] sm:px-6 sm:pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
 					<div className="editorial-surface mx-auto flex w-full max-w-5xl items-center justify-between rounded-[1.75rem] px-3 py-2.5 sm:px-5 sm:py-3">
 						<div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
@@ -39,7 +49,7 @@ export function Layout() {
 							<button
 								type="button"
 								className="inline-flex size-10 cursor-pointer items-center justify-center rounded-full border border-border/70 bg-surface/80 text-muted-foreground shadow-sm transition-colors hover:bg-accent/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-								aria-label="Toggle theme"
+								aria-label={t('common.toggle_theme')}
 								onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
 							>
 								{theme === 'dark' ? (
@@ -55,7 +65,7 @@ export function Layout() {
 								asChild
 								variant="outline"
 								size="icon"
-								aria-label="Saved secrets"
+								aria-label={t('common.saved_secrets')}
 							>
 								<Link to="/storage" className="rounded-full">
 									<Bookmark />
@@ -64,7 +74,14 @@ export function Layout() {
 						</div>
 					</div>
 				</header>
-				<main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+				<main
+					id="main-content"
+					tabIndex={-1}
+					className={cn(
+						'mx-auto w-full flex-1 px-4 py-8 sm:px-6 sm:py-10',
+						pathname === '/' ? 'max-w-[76rem]' : 'max-w-5xl',
+					)}
+				>
 					<Suspense fallback={<RoutePageFallback />}>
 						<Outlet />
 					</Suspense>

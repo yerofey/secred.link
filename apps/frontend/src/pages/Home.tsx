@@ -4,28 +4,28 @@ import {
 	DEFAULT_VERSION_PREFIX,
 	EXPIRATION_PRESETS,
 	MAX_ATTACHMENT_BYTES,
-	MAX_PASSWORD_LENGTH,
 	MAX_SECRET_LENGTH,
 } from '@secred/shared';
 import type { Editor } from '@tiptap/core';
+import { FileText, Paperclip, X } from 'lucide-react';
 import {
-	FileText,
-	Flame,
-	KeyRound,
-	Paperclip,
-	PlusCircle,
-	X,
-} from 'lucide-react';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+	lazy,
+	Suspense,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ExpirationSelect } from '@/components/ExpirationSelect';
-import { PasswordInput } from '@/components/PasswordInput';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { SecretCreateAction } from '@/components/SecretCreateAction';
+import { SecretOptionsPanel } from '@/components/SecretOptionsPanel';
 import { api } from '@/lib/api';
+import { createHomeSubmitBindings } from '@/lib/home-submit-bindings';
 import { useI18n } from '@/lib/i18n';
-import { getPasswordStrength } from '@/lib/passwordStrength';
 import { buildCreateSecretPayloadForSubmit } from '@/lib/secret-create-payload';
+import type { ApiStatus, SubmitPhase } from '@/lib/secret-create-view-state';
+import { getSecretEditorFooterLayout } from '@/lib/secret-editor-footer-layout';
+import { buildSecretOptionsSummary } from '@/lib/secret-options-summary';
 import { devMeasureAsync } from '@/lib/secret-submit-perf';
 import { saveLocalSecret } from '@/lib/storage';
 import { cn } from '@/lib/utils';
@@ -49,9 +49,7 @@ function formatBytes(n: number): string {
 export function Home() {
 	const { t, timeUnit } = useI18n();
 	const navigate = useNavigate();
-	const [apiStatus, setApiStatus] = useState<'pending' | 'ok' | 'error'>(
-		'pending',
-	);
+	const [apiStatus, setApiStatus] = useState<ApiStatus>('pending');
 	const [rawEditing, setRawEditing] = useState(false);
 	const [content, setContent] = useState('');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -59,34 +57,42 @@ export function Home() {
 	const [lifetime, setLifetime] = useState(DEFAULT_SECRET_LIFETIME_SECONDS);
 	const [isBurnable, setIsBurnable] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitPhase, setSubmitPhase] = useState<
-		'idle' | 'encrypt' | 'save' | 'file'
-	>('idle');
+	const [submitPhase, setSubmitPhase] = useState<SubmitPhase>('idle');
+	const [hasSubmitError, setHasSubmitError] = useState(false);
 	const submitInFlightRef = useRef(false);
 	const [attachment, setAttachment] = useState<File | null>(null);
 	const [richEditor, setRichEditor] = useState<Editor | null>(null);
 	const attachmentInputRef = useRef<HTMLInputElement>(null);
 
-	useEffect(() => {
-		api
-			.health()
-			.then(() => setApiStatus('ok'))
-			.catch(() => setApiStatus('error'));
+	const checkHealth = useCallback(async () => {
+		setApiStatus('pending');
+		try {
+			await api.health();
+			setApiStatus('ok');
+		} catch {
+			setApiStatus('error');
+		}
 	}, []);
+
+	useEffect(() => {
+		void checkHealth();
+	}, [checkHealth]);
 
 	const submit = async () => {
 		if (submitInFlightRef.current) {
 			return;
 		}
 		const hasText = content.trim().length > 0;
-		if ((!hasText && !attachment) || apiStatus === 'error') {
-			return;
-		}
-		if (attachment && attachment.size > MAX_ATTACHMENT_BYTES) {
+		if (
+			apiStatus !== 'ok' ||
+			(!hasText && !attachment) ||
+			(attachment !== null && attachment.size > MAX_ATTACHMENT_BYTES)
+		) {
 			return;
 		}
 
 		submitInFlightRef.current = true;
+		setHasSubmitError(false);
 		setIsSubmitting(true);
 		setSubmitPhase('encrypt');
 		try {
@@ -135,6 +141,8 @@ export function Home() {
 			}
 			saveLocalSecret(payload.localSecret, lifetime);
 			navigate({ pathname: '/manage', hash: payload.sid });
+		} catch {
+			setHasSubmitError(true);
 		} finally {
 			submitInFlightRef.current = false;
 			setIsSubmitting(false);
@@ -147,8 +155,11 @@ export function Home() {
 	const attachmentTooLarge =
 		attachment !== null && attachment.size > MAX_ATTACHMENT_BYTES;
 	const hasPayload = hasText || hasAttachment;
-	const disabled =
-		!hasPayload || isSubmitting || apiStatus === 'error' || attachmentTooLarge;
+	const footerLayout = getSecretEditorFooterLayout({
+		hasAttachment,
+		hasError: attachmentTooLarge,
+	});
+	const submitBindings = createHomeSubmitBindings(submit);
 
 	const isAtMaxLength = content.length >= MAX_SECRET_LENGTH;
 	const isNearMaxLength = content.length >= Math.floor(MAX_SECRET_LENGTH * 0.9);
@@ -162,248 +173,154 @@ export function Home() {
 			)}`
 		: t('home.rail.none');
 	const passwordEnabled = password.length > 0;
-	const submitActionLabel = !isSubmitting
-		? t('home.form.create')
-		: submitPhase === 'encrypt'
-			? `${t('home.form.phase_encrypting')}…`
-			: submitPhase === 'save'
-				? `${t('home.form.phase_saving')}…`
-				: submitPhase === 'file'
-					? `${t('home.form.phase_uploading_file')}…`
-					: `${t('home.form.creating')}…`;
-
-	const submitHint = (() => {
-		if (apiStatus === 'error') {
-			return t('home.form.submit_api_unavailable');
-		}
-		if (attachmentTooLarge) {
-			return t('home.form.submit_file_too_large');
-		}
-		if (!hasPayload) {
-			return t('home.form.submit_empty');
-		}
-		return t('home.form.submit_ready');
-	})();
-	const compactSummary = [
-		expirationLabel,
-		passwordEnabled ? t('home.rail.protected_short') : undefined,
-		isBurnable ? t('home.rail.on') : undefined,
-		attachment ? formatBytes(attachment.size) : undefined,
-	]
-		.filter(Boolean)
-		.join(' · ');
+	const compactSummary = buildSecretOptionsSummary(
+		{
+			expiration: expirationLabel,
+			passwordEnabled,
+			burnEnabled: isBurnable,
+			attachmentSize: attachment ? formatBytes(attachment.size) : undefined,
+		},
+		{
+			password: t('home.form.summary_password'),
+			burn: t('home.form.summary_burn'),
+			on: t('home.form.summary_on'),
+			off: t('home.form.summary_off'),
+		},
+	);
 
 	return (
 		<form
-			className="page-shell mx-auto max-w-5xl pb-6 max-lg:pb-10 2xl:max-w-7xl"
+			className="page-shell home-page pb-6"
 			onSubmit={(event) => {
 				event.preventDefault();
-				void submit();
+				void submitBindings.onSubmit();
 			}}
 		>
-			<div className="page-intro mx-auto max-w-3xl pt-2 sm:pt-6">
-				<span className="page-kicker">Secred</span>
+			<div className="page-intro home-page-intro mx-auto max-w-3xl pt-2 sm:pt-4">
 				<h1 className="page-title">{t('home.title')}</h1>
+				<p className="page-subtitle">{t('home.reassurance')}</p>
 			</div>
-			<div className="home-form-surface mx-auto w-full max-w-5xl 2xl:max-w-7xl">
-				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17.5rem,18.75rem)] xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] xl:gap-8">
-					<div className="grid gap-5">
-						{apiStatus === 'error' ? (
-							<div className="status-banner" data-tone="danger">
-								<strong>{t('common.error')}</strong>
-								<p className="text-sm leading-6 text-destructive">
-									{t('home.api.unavailable')}
-								</p>
-							</div>
-						) : null}
-						<div className="grid gap-3">
-							<Suspense
-								fallback={
+			<div className="home-form-surface mx-auto w-full">
+				<div className="home-composer-grid">
+					<div className="home-editor-column">
+						<Suspense
+							fallback={
+								<div
+									className="min-h-0 flex-1 animate-pulse rounded-[1.6rem] border border-input/40 bg-surface-muted/40"
+									aria-hidden
+								/>
+							}
+						>
+							<HomeEditorField
+								content={content}
+								onContentChange={setContent}
+								rawEditing={rawEditing}
+								onRawEditingChange={setRawEditing}
+								richEditor={richEditor}
+								onRichEditor={setRichEditor}
+								textareaRef={textareaRef}
+								t={t}
+								footer={
 									<div
-										className="min-h-[min(24rem,64dvh)] animate-pulse rounded-[1.6rem] border border-input/40 bg-surface-muted/40"
-										aria-hidden
-									/>
-								}
-							>
-								<HomeEditorField
-									content={content}
-									onContentChange={setContent}
-									rawEditing={rawEditing}
-									onRawEditingChange={setRawEditing}
-									richEditor={richEditor}
-									onRichEditor={setRichEditor}
-									textareaRef={textareaRef}
-									apiDisabled={apiStatus === 'error'}
-									t={t}
-									footer={
-										<div className="secret-editor-footer">
-											<input
-												ref={attachmentInputRef}
-												type="file"
-												className="sr-only"
-												id="secret-attachment"
-												onChange={(event) => {
-													const file = event.target.files?.[0];
-													setAttachment(file ?? null);
-												}}
-											/>
-											<div className="secret-editor-footer__main">
-												<label
-													htmlFor="secret-attachment"
-													className="dock-action"
-												>
-													<Paperclip className="size-4" />
-													<span>{t('home.form.attach')}</span>
-												</label>
-												{attachment ? (
-													<span
-														className={cn(
-															'file-chip',
-															attachmentTooLarge && 'file-chip--danger',
-														)}
-													>
-														<FileText className="size-4" />
-														<span className="file-chip__text">
-															<span className="file-chip__name">
-																{attachment.name}
-															</span>
-															<span className="file-chip__meta">
-																{formatBytes(attachment.size)}
-															</span>
-														</span>
-														<button
-															type="button"
-															aria-label={t('home.form.remove_file')}
-															onClick={() => {
-																setAttachment(null);
-																if (attachmentInputRef.current) {
-																	attachmentInputRef.current.value = '';
-																}
-															}}
-														>
-															<X className="size-4" />
-														</button>
-													</span>
-												) : null}
-											</div>
-											<div className="secret-editor-footer__meta">
+										className="secret-editor-footer"
+										data-layout={footerLayout}
+									>
+										<input
+											ref={attachmentInputRef}
+											type="file"
+											className="sr-only"
+											id="secret-attachment"
+											onChange={(event) => {
+												const file = event.target.files?.[0];
+												setAttachment(file ?? null);
+											}}
+										/>
+										<div className="secret-editor-footer__main">
+											<label
+												htmlFor="secret-attachment"
+												className="dock-action"
+											>
+												<Paperclip className="size-4" />
+												<span>{t('home.form.attach')}</span>
+											</label>
+											{attachment ? (
 												<span
 													className={cn(
-														'editor-count',
-														isNearMaxLength && 'editor-count--warn',
-														isAtMaxLength && 'editor-count--max',
+														'file-chip',
+														attachmentTooLarge && 'file-chip--danger',
 													)}
 												>
-													{content.length}/{MAX_SECRET_LENGTH}{' '}
-													{t('home.form.characters')}
+													<FileText className="size-4" />
+													<span className="file-chip__text">
+														<span className="file-chip__name">
+															{attachment.name}
+														</span>
+														<span className="file-chip__meta">
+															{formatBytes(attachment.size)}
+														</span>
+													</span>
+													<button
+														type="button"
+														aria-label={t('home.form.remove_file')}
+														onClick={() => {
+															setAttachment(null);
+															if (attachmentInputRef.current) {
+																attachmentInputRef.current.value = '';
+															}
+														}}
+													>
+														<X className="size-4" />
+													</button>
 												</span>
-											</div>
-											{attachmentTooLarge ? (
-												<p className="secret-editor-footer__error">
-													{t('home.form.file_too_large')}
-												</p>
 											) : null}
 										</div>
-									}
-								/>
-							</Suspense>
-						</div>
-					</div>
-					<div className="side-rail lg:sticky lg:top-6 lg:self-start xl:top-8">
-						<div className="rail-card xl:p-5">
-							<section className="setup-controls">
-								<div className="setup-field">
-									<div className="setup-field-label-row">
-										<KeyRound className="size-4 shrink-0" aria-hidden />
-										<Label
-											htmlFor="password"
-											className="text-[0.75rem] font-extrabold uppercase tracking-[0.12em] text-muted-foreground"
-										>
-											{t('home.form.password')}
-										</Label>
-									</div>
-									<PasswordInput
-										id="password"
-										placeholder={t('home.form.passphrase')}
-										autoComplete="new-password"
-										maxLength={MAX_PASSWORD_LENGTH}
-										value={password}
-										onChange={(event) => setPassword(event.target.value)}
-										aria-describedby={
-											password ? 'password-strength-hint' : undefined
-										}
-									/>
-									{(() => {
-										const tier = getPasswordStrength(password);
-										if (!tier) {
-											return null;
-										}
-										const hint =
-											tier === 'weak'
-												? t('home.form.password_strength_weak')
-												: tier === 'fair'
-													? t('home.form.password_strength_fair')
-													: t('home.form.password_strength_strong');
-										return (
-											<p
-												id="password-strength-hint"
+										<div className="secret-editor-footer__meta">
+											<span
 												className={cn(
-													'text-xs leading-relaxed text-muted-foreground',
-													tier === 'weak' &&
-														'text-amber-700 dark:text-amber-400',
+													'editor-count',
+													isNearMaxLength && 'editor-count--warn',
+													isAtMaxLength && 'editor-count--max',
 												)}
 											>
-												{hint}
+												{content.length}/{MAX_SECRET_LENGTH}{' '}
+												{t('home.form.characters')}
+											</span>
+										</div>
+										{attachmentTooLarge ? (
+											<p className="secret-editor-footer__error">
+												{t('home.form.file_too_large')}
 											</p>
-										);
-									})()}
-								</div>
-								<ExpirationSelect
-									value={lifetime}
-									disabled={apiStatus === 'error'}
-									onChange={setLifetime}
-								/>
-								<label
-									className="setup-field setup-field--switch"
-									htmlFor="burnable"
-								>
-									<span className="setup-switch-main">
-										<Flame className="size-4 shrink-0" aria-hidden />
-										<span>{t('home.form.burnable')}</span>
-									</span>
-									<input
-										id="burnable"
-										type="checkbox"
-										className="switch-control"
-										checked={isBurnable}
-										onChange={(event) =>
-											setIsBurnable(event.currentTarget.checked)
-										}
-									/>
-								</label>
-							</section>
-						</div>
-						<Button
-							type="submit"
-							size="default"
-							className="w-full"
-							disabled={disabled}
-						>
-							<PlusCircle />
-							{submitActionLabel}
-						</Button>
-						<p
-							className={cn(
-								'form-submit-note',
-								attachmentTooLarge && 'form-submit-note--danger',
-							)}
-						>
-							{submitHint}
-							{hasPayload && !attachmentTooLarge && compactSummary
-								? ` · ${compactSummary}`
-								: ''}
-						</p>
+										) : null}
+									</div>
+								}
+							/>
+						</Suspense>
 					</div>
+					<aside
+						className="side-rail"
+						aria-label={t('home.form.options_summary')}
+					>
+						<SecretOptionsPanel
+							password={password}
+							onPasswordChange={setPassword}
+							lifetime={lifetime}
+							onLifetimeChange={setLifetime}
+							isBurnable={isBurnable}
+							onBurnableChange={setIsBurnable}
+							summary={compactSummary}
+						/>
+						<SecretCreateAction
+							apiStatus={apiStatus}
+							hasPayload={hasPayload}
+							isSubmitting={isSubmitting}
+							submitPhase={submitPhase}
+							attachmentTooLarge={attachmentTooLarge}
+							hasSubmitError={hasSubmitError}
+							summary={compactSummary}
+							onRetryHealth={() => void checkHealth()}
+							onRetrySubmit={submitBindings.onRetrySubmit}
+						/>
+					</aside>
 				</div>
 			</div>
 		</form>
